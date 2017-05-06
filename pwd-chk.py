@@ -40,8 +40,8 @@ if args.password:
         print("\tlower-case: " + str(args.lower))
         print("\tupper-case: " + str(args.upper))
         print("\tspecial: " + str(args.special))
-        print("\tnumber: " + str(args.number))
         print("\tspecial set: " + args.set)
+        print("\tnumber: " + str(args.number))
         print("")
 else:
     parser.print_help()
@@ -65,8 +65,8 @@ if args.length > 0:
         failed = True
     else:
         if args.verbose:
-            print("Length result: " + lengthResult.group())
-            print("Passed length")
+            print("\tLength result: " + lengthResult.group())
+            print("\tPassed length")
 
 # lower case regex
 if args.lower > 0:
@@ -90,8 +90,8 @@ if args.lower > 0:
         failed = True
     else:
         if args.verbose:
-            print("Lower-case results: " + lowerResult.group())
-            print("Passed lower-case")
+            print("\tLower-case results: " + lowerResult.group())
+            print("\tPassed lower-case")
 
 # upper case regex
 if args.upper > 0:
@@ -116,14 +116,14 @@ if args.upper > 0:
         failed = True
     else:
         if args.verbose:
-            print("Upper-case results: " + upperResult.group())
-            print("Passed upper-case")
+            print("\tUpper-case results: " + upperResult.group())
+            print("\tPassed upper-case")
 
 # special character regex
 if args.special > 0:
     if args.verbose:
         print("Testing special: " + str(args.special))
-        print('\tspecial set (within quotes): "' + args.set + '"')
+        print('\tspecial set: ' + args.set)
 
     # build special character regex
     strRegexSpecial = ''
@@ -143,8 +143,8 @@ if args.special > 0:
         failed = True
     else:
         if args.verbose:
-            print("Special character results: " + specialCharResult.group())
-            print("Passed special character")
+            print("\tSpecial character results: " + specialCharResult.group())
+            print("\tPassed special character")
 
 # number regex
 if args.number > 0:
@@ -170,8 +170,8 @@ if args.number > 0:
         failed = True
     else:
         if args.verbose:
-            print("Number results: " + numberResult.group())
-            print("Passed number")
+            print("\tNumber results: " + numberResult.group())
+            print("\tPassed number")
 
 # check if any test failed	
 if not failed:
