@@ -5,7 +5,7 @@
 # Python 3.5
 
 # >python -i pwd-chk.py --password SECRET -v 
-# >python -i .\pwd-chk.py -p secretSECRET123!@# -l 10 -a 3 -A 3 -n 3 -s 3
+# >python -i .\pwd-chk.py -p secretSECRET123!@# -l 10 -a 3 -A 3 -n 3 -s 3 -v
 
 
 import re
@@ -56,7 +56,7 @@ if args.length > 0:
     lengthRegex = re.compile(strLengthRegex)
 
     if args.verbose:
-        print("\tRegex for number: " + strLengthRegex)
+        print("\tRegex for length: " + strLengthRegex)
 
     lengthResult = lengthRegex.search(args.password)
 
