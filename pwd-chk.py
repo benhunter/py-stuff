@@ -8,9 +8,8 @@
 # >python -i .\pwd-chk.py -p secretSECRET123!@# -l 10 -a 3 -A 3 -n 3 -s 3 -v
 
 
-import re
 import argparse
-
+import re
 
 failed = False  # Set true if password fails a test.
 
@@ -60,7 +59,7 @@ if args.length > 0:
 
     lengthResult = lengthRegex.search(args.password)
 
-    if lengthResult == None:
+    if lengthResult is None:
         print('FAILED - Password failed length requirement.')
         failed = True
     else:
@@ -85,7 +84,7 @@ if args.lower > 0:
     lowerRegex = re.compile(strRegexLower)
     lowerResult = lowerRegex.search(args.password)
 
-    if lowerResult == None:
+    if lowerResult is None:
         print('FAILED - Password failed lower-case letter requirement.')
         failed = True
     else:
@@ -111,7 +110,7 @@ if args.upper > 0:
     upperRegex = re.compile(strRegexUpper)
     upperResult = upperRegex.search(args.password)
 
-    if upperResult == None:
+    if upperResult is None:
         print('FAILED - Password failed upper-case letter requirement.')
         failed = True
     else:
@@ -138,7 +137,7 @@ if args.special > 0:
     specialCharRegex = re.compile(strRegexSpecial)
     specialCharResult = specialCharRegex.search(args.password)
 
-    if specialCharResult == None:
+    if specialCharResult is None:
         print('FAILED - Password failed special character requirement.')
         failed = True
     else:
@@ -165,7 +164,7 @@ if args.number > 0:
     numberRegex = re.compile(strRegexNumber)
     numberResult = numberRegex.search(args.password)
 
-    if numberResult == None:
+    if numberResult is None:
         print('FAILED - Password failed number requirement.')
         failed = True
     else:
