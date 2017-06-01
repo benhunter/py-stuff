@@ -1,4 +1,4 @@
-# Python Regular Expressions
+# Python Regular Expressions and argparse
 # check password complexity, length, character requirements
 
 # started 18DEC16
