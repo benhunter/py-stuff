@@ -31,6 +31,7 @@ class AppServerSvc(win32serviceutil.ServiceFramework):
                               (self._svc_name_, ''))
         self.main()
 
+    # do stuff
     def main(self):
         # win32api.MessageBox()
         pass
