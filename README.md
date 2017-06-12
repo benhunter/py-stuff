@@ -1,5 +1,5 @@
 # py-stuff
-Python Stuff
+ Python Stuff
 
--Password checker
--Black Hat Python book
+* Password checker
+* Black Hat Python book
