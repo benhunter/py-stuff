@@ -9,7 +9,7 @@ import threading
 
 # global variables
 listen = False
-command = False
+command = False  # True if server is executing a command shell
 upload = False
 execute = ""
 target = ""
@@ -58,18 +58,20 @@ def client_sender(buffer):
 
             while recv_len:
 
+                print("<DEBUG> Receiving data.")
                 data = client.recv(4096).decode('utf-8')
                 recv_len = len(data)
                 response += data
 
                 if recv_len < 4096:
                     break
-
+            print("<Printing response>")
             print(response)
 
             # wait for more input
-            buffer = input("")  # was raw_input() in Python 2
-            buffer += "\n"
+            # buffer = input("")  # was raw_input() in Python 2 TODO this acts weird...
+            buffer = sys.stdin.readline()  # TODO read or readline
+            # TODO needed?: buffer += "\n"
 
             # send it off
             client.send(buffer.encode('utf-8'))
@@ -163,10 +165,23 @@ def client_handler(client_socket):
             response = run_command(cmd_buffer)
 
             if not response:
-                response = ""
+                response = "".encode('utf-8')  # or = b''
+
+            # TODO test the string encoding... sometimes the response is bytes or str
+            # fixed the type test by using type()
+            if type(response) is str:
+                response = response.encode('utf-8')
+            print(response)
+            print(len(response))
+            print(type(response))
+
+            if type(response) is not bytes:
+                print('response is still not bytes... wtf?!?!?!')
+                print('fixing it')
+                response = b''
 
             # send back the response
-            client_socket.send(response.encode('utf-8'))
+            client_socket.send(response)
 
 
 # TODO refactor to remove global variables
@@ -211,9 +226,9 @@ def main():
         print("[*] Client attempting to connect...")
 
         # read in the buffer from the command line
-        # this will block, send Ctrl-d if not sending input
-        # to stdin
-        buffer = sys.stdin.read()
+        # this will block, send EOF (Ctrl-d on Linux, Ctrl-z on Windows)
+        # if not sending input to stdin
+        buffer = sys.stdin.read()  # TODO should it be read (original) or readline?
 
         # send data off
         print("[*] Sending data")
