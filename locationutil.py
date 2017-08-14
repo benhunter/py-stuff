@@ -1,5 +1,6 @@
 import geopy
 
+
 def location_to_latlong(location):
     '''Convert a location to latitude/longitude.
 
