@@ -1,7 +1,9 @@
 # TODO delete own posts if downvoted
 # TODO auto-post (instead of being called) route details for a link to mountainproject that someone posted
 # TODO email a summary of actions daily
-# TODO write a log file instead of only printing to console
+# TODO write a log file instead of only printing to console. Create a new log daily.
+# TODO configure PRAW max retries so program doesn't end when it can't connect
+# TODO store list of comment IDs in a database, maybe SQLite
 
 import praw
 import urllib.parse
@@ -12,7 +14,7 @@ import re
 import time
 import logging
 
-configpath = 'C:\\projects\\climb_bot\\config.json'  # where to find the config JSON
+configpath = 'C:/projects/climb_bot/config.json'  # where to find the config JSON
 config = None  # store the JSON loaded from config file
 
 
@@ -39,7 +41,22 @@ class Route:
                 self.grade + ', ' +
                 self.description +
                 '](' + self.mpurl +
-                ') (route on MountainProject.com)')
+                ') (Route on MountainProject.com)')
+
+class Area:
+    name = ''
+    mpurl = ''
+
+    def __init__(self, name, mpurl):
+        self.name = name
+        self.mpurl = mpurl
+
+    def __str__(self):
+        return ('Area Name: ' + self.name +
+                '\n\tURL: ' + self.mpurl)
+
+    def redditstr(self):
+        return ('[' + self.name + '](' + self.mpurl + ') (Area on MountainProject.com)')
 
 
 def findmproute(query):
@@ -59,6 +76,9 @@ def findmproute(query):
 
     r = requests.get(searchlink)
     j = json.loads(r.content.decode('utf-8'))
+
+    # TODO error handle for no route result (but has area or forum result)
+
     if len(j['results']) > 0:
         ajax = j['results']['Routes'][0]
         soup = BeautifulSoup(ajax, 'html.parser')
@@ -70,6 +90,33 @@ def findmproute(query):
 
         return Route(name, grade, description, link)
 
+    else:
+        return None
+
+def findmparea(query):
+    '''
+    Find the best match for an area on MountainProject.com based on the provided string.
+    :param query: String with the query hopefully containing the name of the area.
+    :return: Area object or None if no area was find.
+    '''
+
+    searchlink = 'https://www.mountainproject.com/ajax/public/search/results/overview?q=' + urllib.parse.quote(query)
+    name = ''
+    link = None
+
+    r = requests.get(searchlink)
+    j = json.loads(r.content.decode('utf-8'))
+
+    # TODO error handle for results that don't include Area
+    # TODO test the code below
+    if len(j['results']) > 0:
+        ajax = j['results']['Areas'][0]
+        soup = BeautifulSoup(ajax, 'html.parser')
+
+        name = soup.tr.td.a.string
+        link = 'https://www.mountainproject.com' + soup.tr.td.strong.a['href']
+
+        return Route(name, grade, description, link)
     else:
         return None
 
@@ -117,34 +164,51 @@ def main(reddit, subreddit):
     '''
     logging.info('Getting ' + str(config['reddit.commentsPerCheck']) + ' comments from r/' + subreddit)
     for comment in reddit.subreddit(subreddit).comments(limit=config['reddit.commentsPerCheck']):
-        match = re.findall('!climb (.*)', comment.body)
+        match = re.findall('![Cc]limb (.*)', comment.body)
         if match:
-            logging.info('Found command: ' + match[0] + '    Command in comment: ' + comment.id)
-            # TODO record URL to comment. Does PRAW provide?
+            logging.info('Found command in comment: ' + comment.id + ': ' + match[0] + ' : ' + comment.permalink())
+            # TODO test permalink
 
             file_obj_r = open(config['bot.commentpath'], 'r')
 
             if comment.id not in file_obj_r.read().splitlines():
                 logging.info('Comment ID is unique: ' + comment.id + ' ...retrieving route info and link')
-                file_obj_r.close()
 
-                # find the MP route link
-                current_route = findmproute(match[0])
-                if current_route != None:
-                    logging.info('Posting reply to comment: ' + comment.id)
-                    comment.reply(current_route.redditstr() + config['bot.footer'])
-                    # TODO does PRAW return the comment ID of the reply we just submitted?
-                    logging.info('Reply posted to comment: ' + comment.id)
-                    logging.info('Opening comment file to record comment: ' + comment.id)
-                    file_obj_w = open(config['bot.commentpath'], 'a+')
-                    file_obj_w.write(comment.id + '\n')
-                    file_obj_w.close()
-                    logging.info('Comment file updated with comment: ' + comment.id)
+                # TODO see what command we are executing
+                # check for  '!climb area'
+                areaMatch = re.findall('[Aa]rea (.*)', match)
+                if len(areaMatch) > 0:
+                    logging.info('Found Area command in comment: ' + comment.id)
+                    #TODO process Area command
+                    currentArea = findmparea(areaMatch[0])
                 else:
-                    logging.warning('ERROR RETRIEVING LINK AND INFO FROM MP. Comment: ' + comment.id +
-                                    '. Body: ' + comment.body)
+                    # check for Route command, otherwise assume we are handling a route.
+                    routeMatch = re.findall('[Rr]oute (.*)', match)
+                    if len(routeMatch) > 0:
+                        logging.info('Found Route commnd in comment: ' + comment.id)
+                        match[0] = routeMatch[0]
+                    else:
+                        logging.info('No additional command found; processing as Route command')
+
+                    # find the MP route link
+                    currentRoute = findmproute(match[0])
+                    if currentRoute != None:
+                        logging.info('Posting reply to comment: ' + comment.id)
+                        comment.reply(currentRoute.redditstr() + config['bot.footer'])
+                        # TODO does PRAW return the comment ID of the reply we just submitted? Log permalink
+                        logging.info('Reply posted to comment: ' + comment.id)
+                        logging.info('Opening comment file to record comment: ' + comment.id)
+                        file_obj_w = open(config['bot.commentpath'], 'a+')
+                        file_obj_w.write(comment.id + '\n')
+                        file_obj_w.close()
+                        logging.info('Comment file updated with comment: ' + comment.id)
+                    else:
+                        logging.warning('ERROR RETRIEVING LINK AND INFO FROM MP. Comment: ' + comment.id +
+                                        '. Body: ' + comment.body)
             else:
                 logging.info('Already visited comment: ' + comment.id + ' ...no reply needed.')
+
+            file_obj_r.close()
 
 
 if __name__ == '__main__':
@@ -161,4 +225,3 @@ if __name__ == '__main__':
         count += 1
         logging.info('Sleeping ' + str(config['bot.sleep']) + ' seconds...')
         time.sleep(config['bot.sleep'])
-
