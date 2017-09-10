@@ -5,6 +5,10 @@
 # TODO configure PRAW max retries so program doesn't end when it can't connect
 # TODO store list of comment IDs in a database, maybe SQLite
 
+# PythonAnywhere hourly command:
+#   workon climb_bot_venv && cd climb_bot/ && python climb_bot.py
+
+
 import praw
 import urllib.parse
 from bs4 import BeautifulSoup
@@ -13,8 +17,15 @@ import json
 import re
 import time
 import logging
+import sys
+import socket
+
+
+lock_socket = None # Method for long running tasks https://help.pythonanywhere.com/pages/LongRunningTasks
 
 configpath = 'C:/projects/climb_bot/config.json'  # where to find the config JSON
+# configpath = '/home/infiniterecursive/climb_bot/config.json'  # path on linux server
+
 config = None  # store the JSON loaded from config file
 
 
@@ -79,7 +90,7 @@ def findmproute(query):
 
     # TODO error handle for no route result (but has area or forum result)
 
-    if len(j['results']) > 0:
+    if len(j['results']) > 0 and j['results'].get('Routes', None) is not None:
         ajax = j['results']['Routes'][0]
         soup = BeautifulSoup(ajax, 'html.parser')
 
@@ -109,23 +120,41 @@ def findmparea(query):
 
     # TODO error handle for results that don't include Area
     # TODO test the code below
-    if len(j['results']) > 0:
+    if len(j['results']) > 0 and j['results'].get('Areas', None) is not None:  # TODO test Areas check
         ajax = j['results']['Areas'][0]
         soup = BeautifulSoup(ajax, 'html.parser')
 
         name = soup.tr.td.a.string
         link = 'https://www.mountainproject.com' + soup.tr.td.strong.a['href']
 
-        return Route(name, grade, description, link)
+        return Area(name, link)
     else:
         return None
 
 
+def is_lock_free():
+    # Can't do any logging here because we haven't config'd the logger yet.
+    global lock_socket
+    lock_socket = socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM)
+    try:
+        lock_id = "infiniterecursive.climb_bot"
+        lock_socket.bind('\0' + lock_id)
+        # logging.debug("Acquired lock %r" % (lock_id,))
+        return True
+    except socket.error:
+        # logging.info("Failed to aquire lock %r" % (lock_id,))
+        return False
+
+
 def init():
-    global config  # JSON loads here
+    global config  # JSON config files will be stored here
 
     # configure logging with timestamp and log level
-    logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s', level=logging.DEBUG, filename='test.log', filemode='a+')
+    # name the log file by date.
+    logging.basicConfig(format='%(asctime)s %(levelname)s:%(message)s',
+                        level=logging.DEBUG,
+                        filename=time.strftime('%Y_%m_%d') + '.log',
+                        filemode='a+')
     logging.info('Initializing')
 
     # TODO error handling for file/config load and authentication
@@ -176,14 +205,14 @@ def main(reddit, subreddit):
 
                 # TODO see what command we are executing
                 # check for  '!climb area'
-                areaMatch = re.findall('[Aa]rea (.*)', match)
+                areaMatch = re.findall('[Aa]rea (.*)', match[0])
                 if len(areaMatch) > 0:
                     logging.info('Found Area command in comment: ' + comment.id)
                     #TODO process Area command
                     currentArea = findmparea(areaMatch[0])
                 else:
                     # check for Route command, otherwise assume we are handling a route.
-                    routeMatch = re.findall('[Rr]oute (.*)', match)
+                    routeMatch = re.findall('[Rr]oute (.*)', match[0])
                     if len(routeMatch) > 0:
                         logging.info('Found Route commnd in comment: ' + comment.id)
                         match[0] = routeMatch[0]
@@ -212,16 +241,20 @@ def main(reddit, subreddit):
 
 
 if __name__ == '__main__':
-    reddit = init()
-    count = 0
-    while True:
-        logging.info('Running bot...')
+    if not is_lock_free():
+        print('climb_bot is already running')
+        sys.exit()
+    else:
+        reddit = init()
+        count = 0
+        while True:
+            logging.info('Running bot...')
 
-        for sub in config['bot.subreddits']:
-             main(reddit, sub)
+            for sub in config['bot.subreddits']:
+                main(reddit, sub)
 
-        logging.info('Loop count is: ' + str(count))
-        print('Count is: ' + str(count))
-        count += 1
-        logging.info('Sleeping ' + str(config['bot.sleep']) + ' seconds...')
-        time.sleep(config['bot.sleep'])
+            logging.info('Loop count is: ' + str(count))
+            print('Count is: ' + str(count))
+            count += 1
+            logging.info('Sleeping ' + str(config['bot.sleep']) + ' seconds...')
+            time.sleep(config['bot.sleep'])
