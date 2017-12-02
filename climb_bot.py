@@ -1,7 +1,6 @@
 # TODO delete own posts if downvoted
 # TODO auto-post (instead of being called) route details for a link to mountainproject that someone posted
 # TODO email a summary of actions daily
-# TODO write a log file instead of only printing to console. Create a new log daily.
 # TODO configure PRAW max retries so program doesn't end when it can't connect
 # TODO store list of comment IDs in a database, maybe SQLite
 
@@ -21,7 +20,7 @@ import sys
 import socket
 
 
-lock_socket = None # Method for long running tasks https://help.pythonanywhere.com/pages/LongRunningTasks
+lock_socket = None  # Method for long running tasks https://help.pythonanywhere.com/pages/LongRunningTasks
 
 configpath = 'C:/projects/climb_bot/config.json'  # where to find the config JSON
 # configpath = '/home/infiniterecursive/climb_bot/config.json'  # path on linux server
@@ -243,6 +242,7 @@ def main(reddit, subreddit):
 if __name__ == '__main__':
     if not is_lock_free():
         print('climb_bot is already running')
+        print('exiting...')
         sys.exit()
     else:
         reddit = init()

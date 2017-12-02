@@ -35,6 +35,9 @@ class AppServerSvc(win32serviceutil.ServiceFramework):
         # win32api.MessageBox()
         pass
 
+        # do the thing
+
+
 
 if __name__ == '__main__':
     win32serviceutil.HandleCommandLine(AppServerSvc)
