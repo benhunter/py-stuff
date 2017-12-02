@@ -17,10 +17,21 @@ def worker():
         else:
             print('Worker', threading.currentThread(), end=' ')
             print('running with argument', arg)
+            work_func(arg)  # do the work
             time.sleep(0.5)
             q.task_done()  # Create queue
 
+# Work function that processes the arguments
+def work_func(arg):
+    print('Working on', arg)
+    print('Square is', arg**2)
+    print('Cube is', arg**3)
+
 q = queue.Queue()
+
+# Begin adding work to the queue
+for i in range(20):
+    q.put(i)
 
 threadPool = []
 # Start a pool of 5 workers
@@ -29,11 +40,7 @@ for i in range(5):
     t.start()
     threadPool.append(t)
 
-time.sleep(5)  # testing if workers die before work is queued
-
-# Begin adding work to the queue
-for i in range(20):
-    q.put(i)
+# time.sleep(5)  # testing if workers die before work is queued - yes they do die
 
 # q.join()
 
