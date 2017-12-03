@@ -8,11 +8,15 @@ def closestAirport(query):
 
     conn = sqlite3.connect('openflight.db')
     cursor = conn.cursor()
-    # cursor.execute('')
+    airportList = cursor.execute('SELECT airport_id, latitude, longitude FROM airports')
+
+    '''
+    # find column names in a database table
+    names = list(map(lambda x: x[0], cursor.description))
+    names = [description[0] for description in cursor.description]
+    '''
 
     return searchCoord
 
 if __name__ == '__main__':
     print(closestAirport('1400 Welton St, Denver, CO'))
-
-
