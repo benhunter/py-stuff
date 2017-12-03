@@ -8,13 +8,16 @@ def closestAirport(query):
 
     conn = sqlite3.connect('openflight.db')
     cursor = conn.cursor()
-    airportList = cursor.execute('SELECT airport_id, latitude, longitude FROM airports')
+    cursor.execute('SELECT airport_id, latitude, longitude FROM airports')
+    airportList = cursor.fetchall()
+    print(len(airportList))
 
-    '''
+    # for row in airportList:
+    #     print(row)
+
     # find column names in a database table
-    names = list(map(lambda x: x[0], cursor.description))
-    names = [description[0] for description in cursor.description]
-    '''
+    # names = list(map(lambda x: x[0], cursor.description))
+    # names = [description[0] for description in cursor.description]
 
     return searchCoord
 
