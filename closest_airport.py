@@ -43,13 +43,8 @@ def closestAirport(query):
 
     conn = sqlite3.connect('openflight.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT latitude, longitude, airport_id FROM airports LIMIT 1000')
+    cursor.execute('SELECT latitude, longitude, airport_id FROM airports') # LIMIT 100000')
     airport_db = cursor.fetchall()
-
-    # print(len(airportList))
-
-    # for row in airportList:
-    #     print(row)
 
     # find column names in a database table
     # names = list(map(lambda x: x[0], cursor.description))
@@ -57,20 +52,27 @@ def closestAirport(query):
 
     airport_list = list(map(lambda airport: ((float(airport[0]), float(airport[1])), airport[2]), airport_db))
 
-    # print(airport_db[0])
     # print(airport_list)
-    airport_list.sort(key=operator.itemgetter(1))
+    # airport_list.sort(key=operator.itemgetter(1))
+    airport_list.sort(key=lambda airport: airport[0][0])
+    # print(airport_list)
+
     tree = kdtree(airport_list)
+
     # print(tree)
 
     closestNode = find_nearest_neighbor((searchCoord.latitude, searchCoord.longitude), tree)
 
+    print('Search Coord:', searchCoord)
+    print('Closest Coord:', closestNode.location)
     print('Distance:', geopy.distance.vincenty((searchCoord.latitude, searchCoord.longitude), closestNode.location))
     print('Airport ID:', closestNode.airport_id)
     print('Airport Name:', cursor.execute('SELECT DISTINCT name FROM airports WHERE airport_id=?', (closestNode.airport_id,)).fetchall())
 
     return closestNode
 
+# coord = (latitude, longitude)
+# kdnode.location = (latitude, longitude)
 def find_nearest_neighbor(coord, kdnode, depth=0):
 
     # 1. Find best leaf node. Save as current best.
@@ -80,16 +82,51 @@ def find_nearest_neighbor(coord, kdnode, depth=0):
     # 2.b.i. If better node is possible, do the entire search on the subtree from current node.
     # 2.b.ii. Continue up the tree.
 
+    if kdnode is None:
+        return None
+
     k = len(kdnode.location)  # assumes all points have the same dimension
     axis = depth % k
+    nearest = None
+    searched_left = None
+    possible_nearest = None
 
-    # start with left_child
-    if kdnode.left_child is not None:
-        current_best = kdnode.left_child
-        current_best_miles = geopy.distance.vincenty(coord, current_best).miles
+    # what is center coord of axis? Difference with search coord determines direction
+    # is tree sorted low left to high right on axis?
+    # 10 - 12 = -2, means go right
+    # 14 - 8 = 6, means go left
+    if kdnode.location[axis] - coord[axis] > 0:
+        nearest = find_nearest_neighbor(coord, kdnode.left_child, depth+1)
+        searched_left = True
+    else:
+        nearest = find_nearest_neighbor(coord, kdnode.right_child, depth+1)
+        searched_left = False
 
-    else # left_child is none
-    # check right_child
+    if nearest is None:
+        return kdnode
+
+    nearest_miles = geopy.distance.vincenty(coord, nearest.location).miles
+    current_miles = geopy.distance.vincenty(coord, kdnode.location).miles
+
+    if current_miles < nearest_miles:
+        nearest = kdnode
+        nearest_miles = current_miles
+
+    # 2.b. Check the splitting plane for possibility of better node.
+    # 2.b.i. If better node is possible, do the entire search on the subtree from current node.
+    if abs(kdnode.location[axis] - coord[axis]) < abs(nearest.location[axis] - coord[axis]):
+        if searched_left:
+            possible_nearest = find_nearest_neighbor(coord, kdnode.left_child, depth+1)
+        else:
+            possible_nearest = find_nearest_neighbor(coord, kdnode.right_child, depth+1)
+
+    if possible_nearest is None:
+        return nearest
+
+    if geopy.distance.vincenty(coord, possible_nearest.location).miles < nearest_miles:
+        return possible_nearest
+
+    return nearest
 
     #######
     # if kdnode is None:
