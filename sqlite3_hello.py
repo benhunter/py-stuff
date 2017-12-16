@@ -25,6 +25,7 @@ for row in csvReader:
 conn.commit()
 print("Done with routes...")
 
+cursor.execute('DROP TABLE airports')
 # Load Airports.dat into database
 cursor.execute('CREATE TABLE IF NOT EXISTS airports ('
                'airport_id, '
@@ -54,9 +55,11 @@ print("Done with airports...")
 
 
 
-all = cursor.execute('SELECT DISTINCT country FROM airports')
+all = cursor.execute('SELECT name FROM airports')
 # print(all)
-print(len(all.fetchall()))
+data = all.fetchall()
+print(len(data))
+print(data)
 
 conn.commit()
 conn.close()
