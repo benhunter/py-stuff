@@ -5,6 +5,7 @@ import sqlite3, csv
 # conn = sqlite3.connect(':memory:')
 conn = sqlite3.connect('openflight.db')
 cursor = conn.cursor()
+cursor.execute('DROP TABLE routes')
 cursor.execute('CREATE TABLE IF NOT EXISTS routes ('
                'airline, '
                'airline_id, '
