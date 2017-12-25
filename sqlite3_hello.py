@@ -1,6 +1,7 @@
 # Testing sqlite3 module
 
-import sqlite3, csv
+import csv
+import sqlite3
 
 # conn = sqlite3.connect(':memory:')
 conn = sqlite3.connect('openflight.db')
@@ -26,6 +27,7 @@ for row in csvReader:
 conn.commit()
 print("Done with routes...")
 
+cursor.execute('CREATE TABLE IF NOT EXISTS airports (key)')
 cursor.execute('DROP TABLE airports')
 # Load Airports.dat into database
 cursor.execute('CREATE TABLE IF NOT EXISTS airports ('
