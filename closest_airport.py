@@ -17,20 +17,15 @@ def closestAirport(query):
     """
 
     search_coord = None
-    searching_nominatim = True
 
-    while searching_nominatim:
+    while True:
         try:
             search_coord = geopy.Nominatim().geocode(query)
             print('Search Coordinate Found:', search_coord)
             if search_coord:
-                # searching_nominatim = False
                 break
         except GeocoderTimedOut:
             print('Search timed out while waiting for Nominatim.')
-            pass
-
-    # searchCoord = Point(latitude=39.9, longitude=-104.7) # 39.902534, -104.714531
 
     conn = sqlite3.connect('openflight.db')
     cursor = conn.cursor()
