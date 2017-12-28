@@ -1,7 +1,6 @@
 #  Take an address or location and return the closest airport
 
 import sqlite3
-from collections import namedtuple
 
 import geopy
 import geopy.distance
@@ -31,7 +30,6 @@ def closestAirport(query):
             print('Search timed out while waiting for Nominatim.')
             pass
 
-    Point = namedtuple('Point', 'latitude longitude')
     # searchCoord = Point(latitude=39.9, longitude=-104.7) # 39.902534, -104.714531
 
     conn = sqlite3.connect('openflight.db')

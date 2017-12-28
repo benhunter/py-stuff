@@ -14,7 +14,8 @@ class KDNode(namedtuple('KDNode', 'location left_child right_child key')):
 def build_kdtree(point_list, depth=0):
     """
     Credit to implementation at https://en.wikipedia.org/wiki/K-d_tree
-    :param point_list: Must be a list of lists: (((latitude1, longitude1), id1), ((latitude2, longitude2), id2), ...).
+    :param point_list: Must be a list of lists, where the each item is a list of coordinates in each axis followed by
+        an ID. For example: [[[latitude1, longitude1], id1], [[latitude2, longitude2], id2], ...].
     :param depth: The current depth in the K-D Tree.
     :return: KDNode object including its left and right children.
     """
@@ -46,14 +47,14 @@ def find_nearest_neighbor(coord, kdnode, depth=0):
     :param kdnode: KDNode. kdnode.location = (latitude, longitude)
     :param depth: The current depth in the tree. Determines which axis is used to organize and split the child nodes.
     :return: KDNode
-    """
 
-    # 1. Find best leaf node. Save as current best.
-    # 2. Unwind recursion up the tree:
-    # 2.a. If current node is better, it becomes current best.
-    # 2.b. Check the splitting plane for possibility of better node.
-    # 2.b.i. If better node is possible, do the entire search on the subtree from current node.
-    # 2.b.ii. Continue up the tree.
+    1. Find best leaf node. Save as current best.
+    2. Unwind recursion up the tree:
+    2.a. If current node is better, it becomes current best.
+    2.b. Check the splitting plane for possibility of better node.
+    2.b.i. If better node is possible, do the entire search on the subtree from current node.
+    2.b.ii. Continue up the tree.
+    """
 
     if kdnode is None:
         return None
@@ -104,10 +105,20 @@ def find_nearest_neighbor(coord, kdnode, depth=0):
 
 def main():
     """Example usage"""
-    example_points = [((2, 3), 0), ((5, 4), 1), ((9, 6), 2), ((4, 7), 3), ((8, 1), 4), ((7, 2), 5)]
+    Point = namedtuple('Point', 'latitude longitude')
+    KDItem = namedtuple('Item', 'point id')
+
+    example_points = [KDItem(Point(2, 3), id=0), KDItem(Point(5, 4), id=1), KDItem(Point(9, 6), id=2),
+                      KDItem(Point(4, 7), id=3), KDItem(Point(8, 1), id=4), KDItem(Point(7, 2), id=5)]
+    # example_points = [((2, 3), 0), ((5, 4), 1), ((9, 6), 2), ((4, 7), 3), ((8, 1), 4), ((7, 2), 5)]
+
     tree = build_kdtree(example_points)
+
     print(tree)
     print(dir(tree))
+    print(len(tree))
+    print(tree[2])
+    print(build_kdtree(example_points))
 
 
 if __name__ == '__main__':
