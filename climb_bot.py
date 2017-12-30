@@ -8,17 +8,17 @@
 #   workon climb_bot_venv && cd climb_bot/ && python climb_bot.py
 
 
-import praw
-import urllib.parse
-from bs4 import BeautifulSoup
-import requests
 import json
-import re
-import time
 import logging
-import sys
+import re
 import socket
+import sys
+import time
+import urllib.parse
 
+import praw
+import requests
+from bs4 import BeautifulSoup
 
 lock_socket = None  # Method for long running tasks https://help.pythonanywhere.com/pages/LongRunningTasks
 
@@ -130,7 +130,6 @@ def findmparea(query):
     else:
         return None
 
-
 def is_lock_free():
     # Can't do any logging here because we haven't config'd the logger yet.
     global lock_socket
@@ -143,7 +142,6 @@ def is_lock_free():
     except socket.error:
         # logging.info("Failed to aquire lock %r" % (lock_id,))
         return False
-
 
 def init():
     global config  # JSON config files will be stored here
@@ -182,7 +180,6 @@ def init():
 
     return reddit
 
-
 def main(reddit, subreddit):
     '''
     Execute the logic of the bot. Run after init() is successful.
@@ -194,7 +191,7 @@ def main(reddit, subreddit):
     for comment in reddit.subreddit(subreddit).comments(limit=config['reddit.commentsPerCheck']):
         match = re.findall('![Cc]limb (.*)', comment.body)
         if match:
-            logging.info('Found command in comment: ' + comment.id + ': ' + match[0] + ' : ' + comment.permalink())
+            logging.info('Found command in comment: ' + comment.id + ': ' + match[0] + ' : ' + comment.permalink)
             # TODO test permalink
 
             file_obj_r = open(config['bot.commentpath'], 'r')

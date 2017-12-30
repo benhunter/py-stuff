@@ -11,8 +11,9 @@ import kdtree
 
 def closestAirport(query):
     """
-
-    :param query:
+    Find the closest airport to a given location.
+    :param query: String with a location, address, or any query supported by Nominatim
+        (https://wiki.openstreetmap.org/wiki/Nominatim).
     :return:
     """
 
