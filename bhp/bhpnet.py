@@ -49,6 +49,7 @@ def client_sender(buffer):
 
         if len(buffer):
             client.send(buffer.encode('utf-8'))
+            print("<DEBUG> Sent an initial buffer in client_sender:", buffer, " Length is:", len(buffer))
 
         while True:
 
@@ -58,15 +59,15 @@ def client_sender(buffer):
 
             while recv_len:
 
-                print("<DEBUG> Receiving data.")
+                # print("<DEBUG> Receiving data.")
                 data = client.recv(4096).decode('utf-8')
                 recv_len = len(data)
                 response += data
 
                 if recv_len < 4096:
                     break
-            print("<Printing response>")
-            print(response)
+            # print("<Printing response>")
+            print(response, end='') # TODO remove the /n that print() adds
 
             # wait for more input
             # buffer = input("")  # was raw_input() in Python 2 TODO this acts weird...
@@ -120,6 +121,8 @@ def client_handler(client_socket):
     global execute
     global command
 
+    print('<DEBUG> Starting client_handler')
+
     # check for upload
     if len(upload_destination):
         # read in all of the bytes and write to our destination
@@ -127,9 +130,11 @@ def client_handler(client_socket):
 
         # keep reading data until none is available
         while True:
-            data = client_socket.recv(1024).decode('utf-8')
+            print('<DEBUG>  Handling upload. Waiting on socket recv...')
+            data = client_socket.recv(1024).decode('utf-8') # TODO decode was not in book
 
             if not data:
+                print('<DEBUG> Handling upload. No data, breaking out of recv loop.')
                 break
             else:
                 file_buffer += data
@@ -138,6 +143,8 @@ def client_handler(client_socket):
             file_descriptor = open(upload_destination, "wb")
             file_descriptor.write(file_buffer)
             file_descriptor.close()
+
+
 
             # acknowledge that we wrote the file out
             client_socket.send(("Successfully saved file to %s\r\n" % upload_destination).encode('utf-8'))
@@ -153,6 +160,7 @@ def client_handler(client_socket):
 
     if command:
         while True:
+            print("<DEBUG> In command loop. Sending prompt.")
             # show simple command prompt
             client_socket.send("<BHP:#> ".encode('utf-8'))
 
@@ -182,6 +190,39 @@ def client_handler(client_socket):
 
             # send back the response
             client_socket.send(response)
+
+    # TODO Adding handler for stdin/stdout... why is this not already included? telnet-like functionality
+
+    # while True:
+    #     print('<DEBUG>  Handling stdout.')
+    #
+    #     # wait for data back
+    #     recv_len = 1
+    #     response = ""
+    #
+    #     while recv_len:
+    #
+    #         print("<DEBUG> Receiving data.")
+    #         data = client_socket.recv(4096).decode('utf-8')
+    #         recv_len = len(data)
+    #         response += data
+    #
+    #         if recv_len < 4096:
+    #             break
+    #     print("<Printing response>")
+    #     print(response)
+    #
+    #     # wait for more input
+    #     print('<DEBUG> waiting on stdin.')
+    #     # buffer = input("")  # was raw_input() in Python 2 TODO this acts weird...
+    #     buffer = sys.stdin.readline()  # TODO read or readline
+    #     # TODO needed?: buffer += "\n"
+    #
+    #     print('<DEBUG> Sending input.')
+    #     # send it off
+    #     client_socket.send(buffer.encode('utf-8'))
+    #
+    # print('<DEBUG> Exiting client_handler')
 
 
 # TODO refactor to remove global variables
@@ -228,7 +269,8 @@ def main():
         # read in the buffer from the command line
         # this will block, send EOF (Ctrl-d on Linux, Ctrl-z on Windows)
         # if not sending input to stdin
-        buffer = sys.stdin.read()  # TODO should it be read (original) or readline?
+        # TODO really needed?
+        buffer = None # sys.stdin.read()  # TODO should it be read (original) or readline?
 
         # send data off
         print("[*] Sending data")
