@@ -59,14 +59,14 @@ def client_sender(buffer):
 
             while recv_len:
 
-                # print("<DEBUG> Receiving data.")
+                print("<DEBUG> Receiving data.")
                 data = client.recv(4096).decode('utf-8')
                 recv_len = len(data)
                 response += data
 
                 if recv_len < 4096:
                     break
-            # print("<Printing response>")
+            print("<Printing response>")
             print(response, end='') # TODO remove the /n that print() adds
 
             # wait for more input
@@ -77,8 +77,8 @@ def client_sender(buffer):
             # send it off
             client.send(buffer.encode('utf-8'))
 
-    except:
-        print("[*] Exception! Exiting.")
+    except Exception as e:
+        print("[*] Exception! Exiting.", e)
         client.close()
 
 
@@ -252,6 +252,7 @@ def main():
         elif o in ("-e", "--execute"):
             execute = a
         elif o in ("-c", "--commandshell"):
+            print('<DEBUG> Running as command shell.')
             command = True
         elif o in ("-u", "--upload"):
             upload_destination = a
@@ -270,7 +271,7 @@ def main():
         # this will block, send EOF (Ctrl-d on Linux, Ctrl-z on Windows)
         # if not sending input to stdin
         # TODO really needed?
-        buffer = None # sys.stdin.read()  # TODO should it be read (original) or readline?
+        buffer = sys.stdin.read()  # TODO should it be read (original) or readline?
 
         # send data off
         print("[*] Sending data")
