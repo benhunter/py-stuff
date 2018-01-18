@@ -48,27 +48,27 @@ else:
 ####################
 # TODO collapse the checks into a single function and iterate over all of them
 # TODO test new code
-categories = (args.length, args.lower, args.upper, args.special, args.number)
-for category in categories:
-    if category > 0:
-        if args.verbose:
-            print('Testing ' + category['name'] + ': ' + str(category['name']))
-
-        str_regex = category['regex']
-        compiled_regex = re.compile(str_regex)
-
-        if args.verbose:
-            print('\tRegex for ' + category['name'] + ': ' + str_regex)
-
-        regex_result = compiled_regex.search(args.password)
-
-        if regex_result is None:
-            print('FAILED - Password failed ' + category['name'] + ' requirement.')
-            failed = True
-        else:
-            if args.verbose:
-                print('\t' + category['name'] + '  result: ' + regex_result.group())
-                print('\tPassed length')
+# categories = (args.length, args.lower, args.upper, args.special, args.number)
+# for category in categories:
+#     if category > 0:
+#         if args.verbose:
+#             print('Testing ' + category['name'] + ': ' + str(category['name']))
+#
+#         str_regex = category['regex']
+#         compiled_regex = re.compile(str_regex)
+#
+#         if args.verbose:
+#             print('\tRegex for ' + category['name'] + ': ' + str_regex)
+#
+#         regex_result = compiled_regex.search(args.password)
+#
+#         if regex_result is None:
+#             print('FAILED - Password failed ' + category['name'] + ' requirement.')
+#             failed = True
+#         else:
+#             if args.verbose:
+#                 print('\t' + category['name'] + '  result: ' + regex_result.group())
+#                 print('\tPassed length')
 ###################################################
 # length regex
 if args.length > 0:
