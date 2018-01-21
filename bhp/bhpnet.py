@@ -47,9 +47,11 @@ def client_sender(buffer):
 
         print("[*] Client connected")
 
-        if len(buffer):
-            client.send(buffer.encode('utf-8'))
-            print("<DEBUG> Sent an initial buffer in client_sender:", buffer, " Length is:", len(buffer))
+        if len(buffer) and not command:
+            client.sendall(buffer.encode('utf-8'))  # TODO send or sendall?
+            # print("<DEBUG> Sent an initial buffer in client_sender:", buffer, " Length is:", len(buffer))
+
+
 
         while True:
 
@@ -59,23 +61,36 @@ def client_sender(buffer):
 
             while recv_len:
 
-                print("<DEBUG> Receiving data.")
+                # print("<DEBUG> Receiving data.")
                 data = client.recv(4096).decode('utf-8')
+                # data2 = client.recv(4096).decode('utf-8')
+                # print("<DEBUG> data:", data)
+                # print("<DEBUG> data2:", data2)
+
                 recv_len = len(data)
+                # recv_len = len(data) + len(data2)
                 response += data
+                # response += data2
+                # print("<DEBUG> response:", response)
 
                 if recv_len < 4096:
+                    # print("<DEBUG> Breaking out of recv loop. recv_len:", recv_len)
                     break
-            print("<Printing response>")
-            print(response, end='') # TODO remove the /n that print() adds
+
+
+
+            # print("<DEBUG> Printing response and reading from stdin.")
+            print(response, end='')  # TODO remove the \n that print() adds
 
             # wait for more input
-            # buffer = input("")  # was raw_input() in Python 2 TODO this acts weird...
-            buffer = sys.stdin.readline()  # TODO read or readline
+            buffer = input("")  # was raw_input() in Python 2 TODO this acts weird...
+            # buffer = sys.stdin.readline()  # TODO read or readline
             # TODO needed?: buffer += "\n"
+            buffer += "\n"
 
             # send it off
-            client.send(buffer.encode('utf-8'))
+            # print("<DEBUG> client.send")
+            client.sendall(buffer.encode('utf-8'))  # TODO send or sendall?
 
     except Exception as e:
         print("[*] Exception! Exiting.", e)
@@ -147,38 +162,46 @@ def client_handler(client_socket):
 
 
             # acknowledge that we wrote the file out
+            print("<DEBUG> client_socket.send")
             client_socket.send(("Successfully saved file to %s\r\n" % upload_destination).encode('utf-8'))
 
         except:
+            print("<DEBUG> client_socket.send - Failed to save file")
             client_socket.send(("Failed to save file to %s\r\n" % upload_destination).encode('utf-8'))
 
     if len(execute):
         # run the command
         output = run_command(execute)
 
-        client_socket.send(output.encode('utf-8'))
+        print("<DEBUG> client_socket.send")
+        client_socket.sendall(output.encode('utf-8'))  # TODO send or sendall?
 
     if command:
+        client_socket.sendall("<BHP:#> ".encode('utf-8'))  # TODO Added here to 'seed' loop. send or sendall?
         while True:
-            print("<DEBUG> In command loop. Sending prompt.")
+            print("<DEBUG> In command loop.")  # Sending prompt.")
             # show simple command prompt
-            client_socket.send("<BHP:#> ".encode('utf-8'))
+            # client_socket.sendall("<BHP:#> ".encode('utf-8'))  # TODO send or sendall?
 
             # receive until we see a linefeed
             cmd_buffer = ""
             while "\n" not in cmd_buffer:
+                print("<DEBUG> Looping client_socket.recv until \\n found")
                 cmd_buffer += client_socket.recv(1024).decode('utf-8')
+                print(cmd_buffer)
 
             # send back the command output
             response = run_command(cmd_buffer)
 
             if not response:
-                response = "".encode('utf-8')  # or = b''
+                response = "".encode('utf-8')  # or = b''?
 
             # TODO test the string encoding... sometimes the response is bytes or str
             # fixed the type test by using type()
             if type(response) is str:
+                # client_socket.re
                 response = response.encode('utf-8')
+            print("Response, length, type")
             print(response)
             print(len(response))
             print(type(response))
@@ -189,7 +212,8 @@ def client_handler(client_socket):
                 response = b''
 
             # send back the response
-            client_socket.send(response)
+            print("<DEBUG> Sending response.")
+            client_socket.sendall(response + "<BHP:#> ".encode('utf-8'))  # TODO send or sendall?
 
     # TODO Adding handler for stdin/stdout... why is this not already included? telnet-like functionality
 
@@ -265,7 +289,7 @@ def main():
 
     # are we going to listen or just send data from stdin?
     if not listen and len(target) and port > 0:
-        print("[*] Client attempting to connect...")
+        print("[*] Beginning client, reading stdin.")
 
         # read in the buffer from the command line
         # this will block, send EOF (Ctrl-d on Linux, Ctrl-z on Windows)
@@ -274,10 +298,10 @@ def main():
         buffer = sys.stdin.read()  # TODO should it be read (original) or readline?
 
         # send data off
-        print("[*] Sending data")
+        print("[*] Starting client_sender with stdin buffer.")
         client_sender(buffer)
 
-    # list and potentially upload, execute commands or drop a shell back
+    # listen and potentially upload, execute commands or drop a shell back
     # depending on command line options
     if listen:
         server_loop()
