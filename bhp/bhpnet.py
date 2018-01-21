@@ -49,7 +49,7 @@ def client_sender(buffer):
 
         if len(buffer) and not command:
             client.sendall(buffer.encode('utf-8'))  # TODO send or sendall?
-            # print("<DEBUG> Sent an initial buffer in client_sender:", buffer, " Length is:", len(buffer))
+            print("<DEBUG> Sent an initial buffer in client_sender:", buffer, " Length is:", len(buffer))
 
 
 
@@ -61,7 +61,7 @@ def client_sender(buffer):
 
             while recv_len:
 
-                # print("<DEBUG> Receiving data.")
+                print("<DEBUG> Receiving data.")
                 data = client.recv(4096).decode('utf-8')
                 # data2 = client.recv(4096).decode('utf-8')
                 # print("<DEBUG> data:", data)
@@ -117,6 +117,8 @@ def server_loop():
         client_thread = threading.Thread(target=client_handler, args=(client_socket,))
         client_thread.start()
 
+        # print("[*] Client handler thread started")  # prints after the thread prints...
+
 
 def run_command(command):
     # trim newline
@@ -163,11 +165,11 @@ def client_handler(client_socket):
 
             # acknowledge that we wrote the file out
             print("<DEBUG> client_socket.send")
-            client_socket.send(("Successfully saved file to %s\r\n" % upload_destination).encode('utf-8'))
+            client_socket.sendall(("Successfully saved file to %s\r\n" % upload_destination).encode('utf-8'))
 
         except:
             print("<DEBUG> client_socket.send - Failed to save file")
-            client_socket.send(("Failed to save file to %s\r\n" % upload_destination).encode('utf-8'))
+            client_socket.sendall(("Failed to save file to %s\r\n" % upload_destination).encode('utf-8'))
 
     if len(execute):
         # run the command
@@ -177,6 +179,7 @@ def client_handler(client_socket):
         client_socket.sendall(output.encode('utf-8'))  # TODO send or sendall?
 
     if command:
+        print("<DEBUG> Seeding command loop with prompt sendall")
         client_socket.sendall("<BHP:#> ".encode('utf-8'))  # TODO Added here to 'seed' loop. send or sendall?
         while True:
             print("<DEBUG> In command loop.")  # Sending prompt.")
@@ -187,8 +190,13 @@ def client_handler(client_socket):
             cmd_buffer = ""
             while "\n" not in cmd_buffer:
                 print("<DEBUG> Looping client_socket.recv until \\n found")
+                len_before = len(cmd_buffer)
                 cmd_buffer += client_socket.recv(1024).decode('utf-8')
                 print(cmd_buffer)
+
+                if len_before == len(cmd_buffer):
+                    print("<DEBUG> No more data. Connection is broken. Ending thread by returning.")
+                    return
 
             # send back the command output
             response = run_command(cmd_buffer)

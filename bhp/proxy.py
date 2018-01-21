@@ -1,5 +1,5 @@
-import sys
 import socket
+import sys
 import threading
 
 
@@ -10,11 +10,11 @@ def hexdump(src, length=16):
     # for i in xrange(0, len(src), length):
     for i in range(0, len(src), length):
         s = src[i:i+length]
-        hexa = b' '.join(["%0*X" % (digits, ord(x)) for x in s])
-        text = b''.join([x if 0x20 <= ord(x) < 0x7F else b'.' for x in s])
-        result.append(b'%04X   %-*s   %s' % (i, length*(digits + 1), hexa, text))
+        hexa = ' '.join(["%0*X" % (digits, ord(x)) for x in s])
+        text = ''.join([x if 0x20 <= ord(x) < 0x7F else '.' for x in s])
+        result.append('%04X   %-*s   %s' % (i, length * (digits + 1), hexa, text))
 
-    print(b'\n'.join(result))
+    print('\n'.join(result))
 
 def receive_from(connection):
     buffer = ""
@@ -25,13 +25,15 @@ def receive_from(connection):
     try:
         # Read into buffer until no data or timeout.
         while True:
-            print('connection.recv(4096)')
-            data = connection.recv(4096)
+            print('connection.recv(4096),', connection.getsockname())
+            data = connection.recv(4096).decode('utf-8')
 
             if not data:
+                print('No data!!')
                 break
             buffer += data
-    except:
+    except Exception as e:
+        print('Exception', e)
         pass
     return buffer
 
@@ -49,9 +51,11 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
     remote_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     remote_socket.connect((remote_host, remote_port))
 
+    print('Connected to remote:', remote_socket.getsockname())
+
     if receive_first:
 
-        print('Receive from remote')
+        print('Receive from remote first')
         remote_buffer = receive_from(remote_socket)
         print('Receive first, dumping recv')
         hexdump(remote_buffer)
@@ -62,14 +66,14 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
         # if we have data for local client, send it
         if len(remote_buffer):
             print("[<==] Sending %d bytes to localhost." % len(remote_buffer))
-            client_socket.send(remote_buffer)
+            client_socket.sendall(remote_buffer.encode('utf-8'))  # TODO send or sendall?
 
     # now loop and read from local, send to remote, send to local.
 
     while True:
 
         # read for local host
-        print('Receive from client')
+        print('Receive from client', client_socket.getsockname())
         local_buffer = receive_from(client_socket)
 
         if len(local_buffer):
@@ -81,11 +85,11 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
             local_buffer = request_handler(local_buffer)
 
             # send off data to remote host
-            remote_socket.send(local_buffer)
+            remote_socket.sendall(local_buffer.encode('utf-8'))  # TODO send or sendall?
             print("[==>] Sent to remote.")
 
             # receive the reponse
-            print('Receive from remote')
+            print('Receive from remote', remote_socket.getsockname())
             remote_buffer = receive_from(remote_socket)
 
             if len(remote_buffer):
@@ -97,7 +101,7 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
                 remote_buffer = response_handler(remote_buffer)
 
                 # send response to local socket
-                client_socket.send(remote_buffer)
+                client_socket.sendall(remote_buffer.encode('utf-8'))  # TODO send or sendall?
 
                 print("[<==] Send to localhost.")
 
