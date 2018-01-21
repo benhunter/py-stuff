@@ -1,4 +1,5 @@
 # Testing sqlite3 module
+# TODO needs with statements
 
 import csv
 import sqlite3
