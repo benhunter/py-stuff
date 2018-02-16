@@ -39,6 +39,7 @@ for i in range(1, 256):
     rainbow.update({digest: chr(i)})
 # print(rainbow)
 
+# check each md5 to decode
 for m in md5_list:
     if m in rainbow:
         print(rainbow.get(m), end='')
