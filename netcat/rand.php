@@ -12,4 +12,15 @@ echo $rand . "\n";
 $rnd &= $rand;
 $CURRENT_CAPTCHA = $rnd;
 
+
+
+$rnd =  mt_rand(1, $_COOKIE['rounds']);
+//Add some randomness
+srand(time());
+$rnd &= rand();
+$CURRENT_CAPTCHA = $rnd;
+
+
+
+
 ?>

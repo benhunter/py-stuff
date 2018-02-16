@@ -50,7 +50,8 @@ srand($time);
 $rnd &= rand();
 '''
 
-round = 3
+# maintains the session
+round = 2
 for i in range(20):
     command = 'php -r \'echo $rnd = mt_rand(1, ' + str(round) + '); srand(time()+1); $rnd &= rand();\''
     cmd_output = subprocess.check_output(command, shell=True)
@@ -59,11 +60,13 @@ for i in range(20):
     # guess &= now
     r = s.post('http://netcat.us:6655/', data={'guess': guess})
     # print(s.cookies)
-    # print(r.content)
-    round += 1
+    print(r.content)
+
     print('round: ', round)
     print('cookie round: ', s.cookies)
     print()
+
+    round += 1
 
 print(s.cookies)
 print(r.content)
