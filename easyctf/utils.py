@@ -3,17 +3,22 @@ import hashlib
 import string
 
 
-def ceaser(plaintext, shift):
+def ceaser(plaintext, shift, mode='encode'):
     '''
-
+    Ceaser cipher encoder and decoder.
     :param plaintext: bytes
     :param shift: int, Number of characters to shift by.
+    :param mode: 'encode' from plain to cipher, 'decode' from cipher to plain.
     :return: bytes
     '''
     if type(plaintext) is not bytes:
         raise TypeError('plaintext must be bytes.')
     alphabet = string.ascii_lowercase.encode()
-    shifted_alphabet = alphabet[shift:] + alphabet[:shift]
+    if mode == 'encode':
+        shifted_alphabet = alphabet[shift:] + alphabet[:shift]
+    elif mode == 'decode':
+        shift *= -1
+        shifted_alphabet = alphabet[shift:] + alphabet[:shift]
     table = bytes.maketrans(alphabet, shifted_alphabet)
     return plaintext.translate(table)
 
@@ -157,14 +162,13 @@ def solve_IntroReverseEngineering():
 
 
 def solve_ProgrammingOverandOver():
-    N = 0
+    N = int(input())
     print('over' if N == 1 else ' and '.join(['over' for i in range(N)]), end='')
 
 
-solve_ProgrammingOverandOver()
-
-N =
-string1 = 'over'
-for i in range(N - 1):
-    string1 += ' and over'
-print(string1)
+def solve_ProgrammingTeachingOldTricksNewDogs():
+    N = int(input())
+    cipher = input().encode()
+    # N = 6
+    # cipher = 'o rubk kgyeizl'.encode()
+    print(ceaser(cipher, N, mode='decode').decode())
