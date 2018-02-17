@@ -51,3 +51,5 @@ for c in char_set:
     print(type(m.hexdigest()))
     print({m.hexdigest(): c})
     print({c: m.hexdigest()})
+
+print(ord(chr(40)))
