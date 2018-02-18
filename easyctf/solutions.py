@@ -1,5 +1,6 @@
 import binascii
 import hashlib
+import itertools
 import string
 from collections import OrderedDict
 
@@ -188,3 +189,23 @@ def solve_xor():
             # print(chr(i ^ n), end='')
         if chr(b[0]) == 'e':
             print(b.decode())
+
+
+def solve_ProgrammingSubsetCounting():
+    # N, S = [int(i) for i in input().split()]
+    # data = [int(i) for i in input().split()]
+    N = 6
+    S = 5
+    data = [2, 4, 1, 1, 1, 2]
+    # print(N, S, data)
+
+    # one way to do it
+    solutions = 0
+    for i in range(1, len(data) + 1):
+        for combo in itertools.combinations(data, i):
+            if sum(combo) == S:
+                # print('Solution:', combo)
+                solutions += 1
+    print(solutions)
+
+    # one liner with iterators and list comprehensions?
