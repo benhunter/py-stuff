@@ -1,9 +1,20 @@
+#!/usr/bin/env python
+
 import subprocess
 
 import paramiko
 
 
 def ssh_command(host, user, passwd, command, port=22):
+    '''
+    Connect by SSH to a host server with username and password and
+    :param host:
+    :param user: Username
+    :param passwd: Password
+    :param command: Shell command to exectute on the local host.
+    :param port: Defauly SSH port 22
+    :return: Nothing
+    '''
     client = paramiko.SSHClient()
     # client.load_host_keys('/user/.ssh/known_hosts')
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())

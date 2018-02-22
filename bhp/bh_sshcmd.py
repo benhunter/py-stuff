@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import paramiko
 
 
@@ -8,6 +10,7 @@ def ssh_command(ip, port, user, passwd, command):
     client.connect(hostname=ip, port=port, username=user, password=passwd)
     ssh_session = client.get_transport().open_session()
     if ssh_session.active:
+        print('========== ACTIVE SESSION ==========')
         ssh_session.exec_command(command)
         print(ssh_session.recv(1024))
     return
