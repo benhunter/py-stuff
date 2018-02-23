@@ -1,8 +1,14 @@
+#!/usr/bin/env python
+
 import socket
 import sys
 import threading
 
 import paramiko
+
+# Usage ./bh_server.py server port
+# Works with bh_sshRcmd.py
+
 
 # using key from the Paramiko demo files
 # host_key = paramiko.RSAKey(filename='test_rsa.key')
@@ -10,8 +16,12 @@ host_key = paramiko.RSAKey.generate(bits=512)
 
 
 class Server(paramiko.ServerInterface):
+    username = 'test'
+    password = 'testpwd'
+
     def _init_(self):
         self.event = threading.Event()
+
 
     def check_channel_request(self, kind, chanid):
         if kind == 'session':
@@ -19,7 +29,7 @@ class Server(paramiko.ServerInterface):
         return paramiko.OPEN_FAILED_ADMINISTRATIVELY_PROHIBITED
 
     def check_auth_password(self, username, password):
-        if (username == 'test') and (password == 'testpwd'):
+        if (username == self.username) and (password == self.password):
             return paramiko.AUTH_SUCCESSFUL
         return paramiko.AUTH_FAILED
 
@@ -51,8 +61,9 @@ try:
     if not chan:  # Added error handling
         exit(1)
 
-    print('[+] Authenticated!')
+    print('[+] Authenticated! Recving first.')
     print(chan.recv(1024))
+
     chan.send('Welcome to bh_ssh')
     while True:
         try:
