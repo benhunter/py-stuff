@@ -33465,6 +33465,13 @@ def solve_jsonparsingtwo():
         print(key, statistics[key])
 
 
+def solve_ihaveamessageforyou():
+    crpyt = b'Nhyob vfs a ccy dv vjhezmv bymw decr xfgv h dfhprgc voeqtj domm gc hkrsddw rr zbu ghkqb pz nclxqdwtpuqr'
+
+    # frequency analysis
+
+
+
 if __name__ == '__main__':
     # solve_evenmorebasicmathwithsomejunk()
     # solve_jsonparsingone()
