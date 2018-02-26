@@ -1,3 +1,4 @@
+import itertools
 import json
 import string
 from collections import OrderedDict
@@ -13,9 +14,8 @@ def loadjson(file):
         return json.load(f)
 
 
-def solve_frequency():
-    cipher = b'Nhyob vfs a ccy dv vjhezmv bymw decr xfgv h dfhprgc voeqtj domm gc hkrsddw rr zbu ghkqb pz nclxqdwtpuqr'
-    cipher = cipher.upper()
+def solve_frequency(inbytes):
+    cipher = inbytes.upper()
 
     # analyze frequncy and build substitution table
     # English letter frequency:
@@ -53,5 +53,23 @@ def solve_frequency():
         print(chr(substitution_table[cipher[i]]), end='')
 
 
+def stringwithspacescommastolist(the_string):
+    return list(itertools.chain.from_iterable(map(lambda x: x.strip().split(), the_string.split(','))))
+
+
+def int_ignore_crap(list_of_string):
+    # print(list_of_string)
+    int_list = []
+    for the_string in list_of_string:
+        try:
+            # print(the_string)
+            # print(int(the_string))
+            int_list.append(int(the_string))
+        except ValueError:
+            pass
+    return int_list
+
+
 if __name__ == '__main__':
-    solve_frequency()
+    solve_frequency(
+        b'Nhyob vfs a ccy dv vjhezmv bymw decr xfgv h dfhprgc voeqtj domm gc hkrsddw rr zbu ghkqb pz nclxqdwtpuqr')

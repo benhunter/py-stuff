@@ -33432,37 +33432,104 @@ def solve_jsonparsingone():
 
 def solve_jsonparsingtwo():
     import json
-    filename = 'file-20171020T1500.json'
+
+    filename = '../../../ctf/neverlanctf-feb18/file-20171020T1500.json'
     data = []
     with open(filename) as f:
         for line in f.readlines():
             data.append(json.loads(line))
 
-    # pprint.pprint(data)
+    for i in range(10):
+        data[i]['scans'] = 0
+        pprint.pprint(data[i])
 
     statistics = {}
     # statistics = collections.OrderedDict()
 
     for scan in data:
         try:
-            pprint.pprint(scan['additional_info']['sections'])
-            for pe_part in scan['additional_info']['sections']:
+
+            # pprint.pprint(scan['additional_info']['pe-resource-detail'])
+
+            # NOT USING pprint.pprint(scan['additional_info']['sections'])
+            # NOT USING pprint.pprint(scan['additional_info']['exiftool']['PEType'])
+            # pprint.pprint(scan['md5'])
+            # try:
+            #     statistics[scan['md5']] += 1
+            # except KeyError:
+            #     statistics[scan['md5']] = 1
+
+            for pe_part in scan['additional_info']['pe-resource-list']:
                 try:
-                    statistics[pe_part[5]] += 1
+                    # print(pe_part)
+                    statistics[pe_part] += 1
                 except KeyError:
-                    statistics[pe_part[5]] = 1
+                    statistics[pe_part] = 1
 
         except KeyError:
-            # try:
-            #     statistics[scan['additional_info']['sections']['md5']] = 1
-            # except KeyError:
             pass
 
-    print(statistics)
-    print(sorted(statistics))
+    # print(statistics)
+    # print(sorted(statistics))
 
     for key in sorted(statistics, key=statistics.__getitem__):
         print(key, statistics[key])
+
+
+def solve_jsonparsingthree():
+    import json
+
+    filename = '../../../ctf/neverlanctf-feb18/file-20171020T1500.json'
+    data = []
+    with open(filename) as f:
+        for line in f.readlines():
+            data.append(json.loads(line))
+
+    # for i in range(10):
+    #     data[i]['scans'] = 0
+    #     pprint.pprint(data[i])
+
+    statistics = {}
+    # statistics = collections.OrderedDict()
+
+    for i in range(len(data)):
+        scan = data[i]
+
+        count = 0
+        for vendor in scan['scans']:
+            # print(scan)
+            # print(vendor)
+            # print(scan['scans'][vendor])
+            if scan['scans'][vendor]['detected']:
+                count += 1
+            print(count)
+            scan['positivecount'] = count
+
+    for scan in data:
+        if scan['positivecount'] > 1:
+            print(scan['positivecount'], scan['ssdeep'])
+
+    datasorted = sorted(data, key=(lambda x: x['positivecount']), reverse=True)
+    print(type(datasorted))
+    print(len(datasorted))
+    print(datasorted[0])
+
+    secondhighest = datasorted[3]
+    print("Second highest number of positive detections: ")
+    print(secondhighest['positivecount'])
+    print(secondhighest['ssdeep'])
+    print(secondhighest)
+
+    # now find the closest fuzzy hash to secondhighest
+
+    # testsorted = sorted(data, key=lambda x: x['positivecount'], reverse=True)
+    # print('>>> testsorted', testsorted)
+    #
+    # for item in testsorted:
+    #     print(item['positivecount'])
+    #
+    # for i in sorted(data, key=lambda x: x['positivecount'], reverse=True):
+    #     print(i['positivecount'])
 
 
 def solve_ihaveamessageforyou():
@@ -33471,8 +33538,8 @@ def solve_ihaveamessageforyou():
     # frequency analysis
 
 
-
 if __name__ == '__main__':
     # solve_evenmorebasicmathwithsomejunk()
     # solve_jsonparsingone()
-    solve_jsonparsingtwo()
+    # solve_jsonparsingtwo()
+    solve_jsonparsingthree()
