@@ -12,11 +12,13 @@
 import argparse
 import re
 
+import collections
+
 
 def main():
     parser = build_parser()
     args = parse_args(parser)
-    failed = check_password_old(args)
+    failed = check_password_new(args)
 
     # check if any test failed
     if not failed:
@@ -25,32 +27,72 @@ def main():
 
 def check_password_new(args):
     passed = True
+    tests = []
 
-    # TODO test new code
-    categories = (args.length, args.lower, args.upper, args.special, args.number)
+    PasswordTest = collections.namedtuple('PasswordTest', ['name', 'value', 'regex'])
 
-    categories = ({'name': 'length', 'regex': r'.*', 'value': 0},)
+    if args.length:
+        tests.append(PasswordTest('length', args.length, r'.{' + str(args.length) + ',}'))
 
-    for category in categories:
-        if category['value'] > 0:
+    if args.lower:
+        str_regex_lower = r''
+
+        for count in range(args.lower):
+            str_regex_lower += r'[a-z].*'
+
+        str_regex_lower = str_regex_lower[:-2]
+
+        tests.append(PasswordTest('lower', args.lower, str_regex_lower))
+
+    if args.upper:
+        str_regex_upper = r''
+
+        for count in range(args.upper):
+            str_regex_upper += r'[A-Z].*'
+
+        str_regex_upper = str_regex_upper[:-2]
+
+        tests.append(PasswordTest('upper', args.upper, str_regex_upper))
+
+    if args.number:
+        str_regex_number = r''
+
+        for count in range(args.number):
+            str_regex_number += r'\d.*'
+
+        str_regex_number = str_regex_number[:-2]
+
+        tests.append(PasswordTest('number', args.number, str_regex_number))
+
+    if args.special:
+        str_regex_special = r''
+
+        for count in range(args.special):
+            str_regex_special += r'[' + args.set + r'].*'
+
+        str_regex_special = str_regex_special[:-2]
+
+        tests.append(PasswordTest('special', args.special, str_regex_special))
+
+    for test in tests:
+        if args.verbose:
+            print('Testing ' + test.name + ': ' + str(test.value))
+
+        compiled_regex = re.compile(test.regex)
+
+        if args.verbose:
+            print('\tRegex for ' + test.name + ': ' + test.regex)
+
+        regex_result = compiled_regex.search(args.password)
+
+        if not regex_result:
+            print('FAILED - Password failed ' + test.name + ' requirement.')
+            passed = False
+        else:
             if args.verbose:
-                print('Testing ' + category['name'] + ': ' + str(category['name']))
+                print('\t' + test.name + '  regex result: ' + regex_result.group())
+                print('\tPassed ' + test.name)
 
-            str_regex = category['regex']
-            compiled_regex = re.compile(str_regex)
-
-            if args.verbose:
-                print('\tRegex for ' + category['name'] + ': ' + str_regex)
-
-            regex_result = compiled_regex.search(args.password)
-
-            if regex_result is None:
-                print('FAILED - Password failed ' + category['name'] + ' requirement.')
-                passed = False
-            else:
-                if args.verbose:
-                    print('\t' + category['name'] + '  regex: ' + regex_result.group())
-                    print('\tPassed length')
     return passed
 
 
@@ -262,11 +304,11 @@ def test_check_password_old():
 
 
 def test_check_password_new():
+    parser = build_parser()
+
     def test(args, result):
         parsed_args = parser.parse_args(args)
         assert check_password_new(parsed_args) == result
-
-    parser = build_parser()
 
     test(['-v', '--password', 'SECRET'], True)
     test(['-v', '--password', 'SECRET', '-l', '4'], True)
@@ -283,6 +325,8 @@ def test_check_password_new():
     test(['-v', '--password', '0S1E2CRETsecr!e@t#', '-s', '3'], True)
     test(['-v', '--password', '0S1E2CRETsecr!e@t#', '-s', '10'], False)
     test(['-v', '--password', '0S1E2CRETsecr!e@t#', '-l', '10', '-a', '3', '-A', '3', '-n', '3', '-s', '3'], True)
+    test(['-v', '--password', '0S1E2CRETsecr!e@t#', '-s', '3', '--set', r',./<>?'], False)
+    test(['-v', '--password', r'0S1E<2>C/\xRETsecr', '-s', '3', '--set', r',./\<>?'], True)
 
 
 if __name__ == '__main__':
