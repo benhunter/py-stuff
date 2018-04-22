@@ -20,15 +20,15 @@ DEFAULT_SPECIAL_CHAR = '!@#$%^&*.'
 def main():
     parser = build_parser()
     args = parse_args(parser)
-    failed = check_password_new(args)
+    failed = check_password(args)
 
     # check if any test failed
     if not failed:
         print('PASSED - All tests passed.')
 
 
-def check_password_new(password, length=0, lower=0, upper=0, number=0, special=0, special_charset=DEFAULT_SPECIAL_CHAR,
-                       verbose=False):
+def check_password(password, length=0, lower=0, upper=0, number=0, special=0, special_charset=DEFAULT_SPECIAL_CHAR,
+                   verbose=False):
     passed = True
     tests = []
 
@@ -99,133 +99,6 @@ def check_password_new(password, length=0, lower=0, upper=0, number=0, special=0
     return passed
 
 
-def check_password_old(args):
-    passed = True  # Set false if password fails a test.
-
-    # length regex
-    if args.length > 0:
-        if args.verbose:
-            print('Testing length: ' + str(args.length))
-
-        strLengthRegex = r'.{' + str(args.length) + ',}'
-        lengthRegex = re.compile(strLengthRegex)
-
-        if args.verbose:
-            print('\tRegex for length: ' + strLengthRegex)
-
-        lengthResult = lengthRegex.search(args.password)
-
-        if lengthResult is None:
-            print('FAILED - Password failed length requirement.')
-            passed = False
-        else:
-            if args.verbose:
-                print('\tLength result: ' + lengthResult.group())
-                print('\tPassed length')
-    # lower case regex
-    if args.lower > 0:
-        if args.verbose:
-            print('Testing lower-case: ' + str(args.lower))
-
-        strRegexLower = ''
-
-        for count in range(args.lower):
-            strRegexLower += '[a-z].*'
-
-        strRegexLower = strRegexLower[:-2]
-        if args.verbose:
-            print('\tRegex for lower: ' + strRegexLower)
-
-        lowerRegex = re.compile(strRegexLower)
-        lowerResult = lowerRegex.search(args.password)
-
-        if lowerResult is None:
-            print('FAILED - Password failed lower-case letter requirement.')
-            passed = False
-        else:
-            if args.verbose:
-                print('\tLower-case results: ' + lowerResult.group())
-                print('\tPassed lower-case')
-    # upper case regex
-    if args.upper > 0:
-        if args.verbose:
-            print('Testing upper-case: ' + str(args.upper))
-
-        # build upper regex
-        strRegexUpper = ''
-
-        for count in range(args.upper):
-            strRegexUpper += '[A-Z].*'
-
-        strRegexUpper = strRegexUpper[:-2]
-        if args.verbose:
-            print('\tRegex for upper: ' + strRegexUpper)
-
-        upperRegex = re.compile(strRegexUpper)
-        upperResult = upperRegex.search(args.password)
-
-        if upperResult is None:
-            print('FAILED - Password failed upper-case letter requirement.')
-            passed = False
-        else:
-            if args.verbose:
-                print('\tUpper-case results: ' + upperResult.group())
-                print('\tPassed upper-case')
-    # special character regex
-    if args.special > 0:
-        if args.verbose:
-            print('Testing special: ' + str(args.special))
-            print('\tspecial set: ' + args.set)
-
-        # build special character regex
-        strRegexSpecial = ''
-
-        for count in range(args.special):
-            strRegexSpecial += '[' + args.set + '].*'
-
-        strRegexSpecial = strRegexSpecial[:-2]
-        if args.verbose:
-            print('\tRegex for special: ' + strRegexSpecial)
-
-        specialCharRegex = re.compile(strRegexSpecial)
-        specialCharResult = specialCharRegex.search(args.password)
-
-        if specialCharResult is None:
-            print('FAILED - Password failed special character requirement.')
-            passed = False
-        else:
-            if args.verbose:
-                print('\tSpecial character results: ' + specialCharResult.group())
-                print('\tPassed special character')
-    # number regex
-    if args.number > 0:
-        if args.verbose:
-            print('Testing number: ' + str(args.number))
-
-        # build number regex
-        strRegexNumber = ''
-
-        for count in range(args.number):
-            strRegexNumber += '\d.*'
-
-        strRegexNumber = strRegexNumber[:-2]
-
-        if args.verbose:
-            print('\tRegex for number: ' + strRegexNumber)
-
-        numberRegex = re.compile(strRegexNumber)
-        numberResult = numberRegex.search(args.password)
-
-        if numberResult is None:
-            print('FAILED - Password failed number requirement.')
-            passed = False
-        else:
-            if args.verbose:
-                print('\tNumber results: ' + numberResult.group())
-                print('\tPassed number')
-    return passed
-
-
 def parse_args(parser):
     # execute command parser
     args = parser.parse_args()
@@ -282,38 +155,14 @@ def test_build_parser():
     assert args.length == 10
 
 
-def test_check_password_old():
-    def test(args, result):
-        parsed_args = parser.parse_args(args)
-        assert check_password_old(parsed_args) == result
-
-    parser = build_parser()
-
-    test(['-v', '--password', 'SECRET'], True)
-    test(['-v', '--password', 'SECRET', '-l', '4'], True)
-    test(['-v', '--password', 'SECRET', '-l', '10'], False)
-    test(['-v', '--password', 'secret', '-a', '4'], True)
-    test(['-v', '--password', 'secret', '-a', '10'], False)
-    test(['-v', '--password', '0s1e2c3r4e5t6', '-a', '10'], False)
-    test(['-v', '--password', 'SECRET', '-A', '4'], True)
-    test(['-v', '--password', 'SECRET', '-A', '10'], False)
-    test(['-v', '--password', '12345', '-n', '4'], True)
-    test(['-v', '--password', '12345', '-n', '10'], False)
-    test(['-v', '--password', '0s1e2c3r4e5t6', '-n', '4'], True)
-    test(['-v', '--password', '0s1e2c3r4e5t6', '-n', '10'], False)
-    test(['-v', '--password', '0S1E2CRETsecr!e@t#', '-s', '3'], True)
-    test(['-v', '--password', '0S1E2CRETsecr!e@t#', '-s', '10'], False)
-    test(['-v', '--password', '0S1E2CRETsecr!e@t#', '-l', '10', '-a', '3', '-A', '3', '-n', '3', '-s', '3'], True)
-
-
-def test_check_password_new():
+def test_check_password():
     parser = build_parser()
 
     def test(args, expected):
         parsed = parser.parse_args(args)
-        result = check_password_new(parsed.password, length=parsed.length, lower=parsed.lower, upper=parsed.upper,
-                                    number=parsed.number, special=parsed.special, special_charset=parsed.set,
-                                    verbose=parsed.verbose)
+        result = check_password(parsed.password, length=parsed.length, lower=parsed.lower, upper=parsed.upper,
+                                number=parsed.number, special=parsed.special, special_charset=parsed.set,
+                                verbose=parsed.verbose)
         assert result == expected
 
     test(['-v', '--password', 'SECRET'], True)
