@@ -42,6 +42,7 @@ while True:
         # print(tag)
         tag['fill'] = 'black'
         tag['stroke'] = 'black'
+        # print('tag type: ', type(tag['d']))
 
     # convert to png
     png = 'captcha2_test.png'
