@@ -32,7 +32,7 @@ def test_submit_captcha(captcha='pV74S', session_id='7fc6116a2f6025109873823a091
         # start_time = time.perf_counter()
         r = requests.get(url, cookies={'PHPSESSID': session_id})
         r_img = requests.get(img_url, cookies={'PHPSESSID': session_id})
-        # mid_time = time.perf_counter()
+        # mid_time = time.perf_counterf()
         r = requests.post(url, cookies={'PHPSESSID': session_id}, data={'captcha': captcha})
         # end_time = time.perf_counter()
         # print('mid time: ', end_time - mid_time)
@@ -49,9 +49,10 @@ def test_submit_captcha(captcha='pV74S', session_id='7fc6116a2f6025109873823a091
         count += 1
 
 
-test_submit_captcha()
+if __name__ == '__main__':
+    test_submit_captcha()
 
-# test Zion's session: '@ROq+' <- CONFIRMED Session ID ensures timing, does not generate new images
-# import pdb; pdb.set_trace()
+    # test Zion's session: '@ROq+' <- CONFIRMED Session ID ensures timing, does not generate new images
+    # import pdb; pdb.set_trace()
 
-test_submit_captcha(captcha='EV?#i')
+    test_submit_captcha(captcha='EV?#i')
