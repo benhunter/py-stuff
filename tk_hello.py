@@ -15,6 +15,7 @@ class Application(tk.Frame):
         self.hi_there = tk.Button(self)
         self.hi_there["text"] = "Hello World\n(click me)"
         self.hi_there["command"] = self.say_hi
+        self.hi_there.config(font=("Courier", 44))
         self.hi_there.pack(side="top")
         self.quit = tk.Button(self, text="QUIT", command=root.destroy) # fg="red" not supported in ttk, use Style instead
         self.quit.pack(side="bottom")
