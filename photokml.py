@@ -1,3 +1,6 @@
+# Use geo-tagged photos to build a Google Earth file showing the photos where they were taken. Uses EXIF data to generate a KML.
+# TODO Add web photo album enumeration: Google Drive, Google Photos, Instagram (EXIF?), Imgur (EXIF?)
+
 # https://github.com/collective/collective.geo.exif/blob/master/collective/geo/exif/readexif.py
 # KML Docs: https://developers.google.com/kml/documentation/kml_tut
 # KML Schema: http://schemas.opengis.net/kml/2.2.0/ogckml22.xsd
@@ -21,6 +24,7 @@ def main(target, outname=OUTNAME, recursive=False):
     # any other EXIF data
     # make a KMZ that includes the photos (or URL to show the photo in Google Earth)
 
+    # TODO why don't relative paths work? Not expanded by shell?
     # TODO test cross platform paths ('\' vs '/')
     # fix path string
     if not target.endswith('/'):
@@ -42,26 +46,31 @@ def main(target, outname=OUTNAME, recursive=False):
         if not recursive:
             break  # call to walk only the top directory
 
+    # order the files by name
+    files.sort()
+
     for file in files:
         imagegps = exifgps.read(file)  # create the ImageGPS object
         # print(imagegps)
         imagegps.process_exif()  # read EXIF data and convert to KML coordinate format
         if imagegps._has_gps:
-            print(file, imagegps._decimal_degrees)
+            # print(file, imagegps._decimal_degrees)
 
             northing, easting = imagegps._decimal_degrees  # order is latitude, longitude
             elevation = 0
 
             # construct the KML tag and add it
             # TODO set the relative altitude mode...
-            p = kml.Placemark(ns, file, file, file)
+            description = '<img style="max-width:500px;" src="file://' + file + '">'
+            p = kml.Placemark(ns, file, file, description)
             # KML uses long, lat, alt for ordering coordinates (x, y, z)
             p.geometry = Point(easting, northing, elevation)
             d.append(p)
     # finish the KML
-    print(k.to_string(prettyprint=True))
+    # print(k.to_string(prettyprint=True))
     with open(outname, 'w') as f:
         f.write(k.to_string())
+        print('Finished. Wrote to:', outname)
 
 
 if __name__ == '__main__':
