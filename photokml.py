@@ -7,6 +7,7 @@
 # KML Sample: https://developers.google.com/kml/documentation/KML_Samples.kml
 
 
+import os
 import sys
 from os import walk
 
@@ -15,6 +16,37 @@ from fastkml import kml  # seems more current than pyKML
 from shapely.geometry import Point
 
 OUTNAME = 'photos.kml'
+
+
+def _read_exif(self, filename):
+    '''
+    Dynamic update to Imagegps in exifgps/__init__.py
+    Stores all the EXIF tags in the Imagegps object
+    '''
+    gps = {}
+
+    if os.path.exists(filename) == False:
+        print("Error: Unable to open %s" % filename)
+        return None
+
+    with open(filename, "rb") as fh:
+        import exifread  # added
+        tags = exifread.process_file(fh, details=False)
+        self._tags = tags  # the new code so tags are accessible
+
+    if len(tags) != 0:
+        for tag in tags.keys():
+            if "GPS" in tag:
+                gps[tag] = tags[tag]
+    return gps
+
+
+def get_datetime(self):
+    '''
+    Dynamic update to Imagegps in exifgps/__init__.py
+    Retrieves the DateTime EXIF tag.
+    '''
+    return self._tags['Image DateTime']
 
 
 def main(target, outname=OUTNAME, recursive=False):
@@ -28,7 +60,7 @@ def main(target, outname=OUTNAME, recursive=False):
 
     # TODO why don't relative paths work? Not expanded by shell?
     # TODO test cross platform paths ('\' vs '/')
-    # fix path string
+    # fix path string on linux
     if not target.endswith('/'):
         target += '/'
 
@@ -54,6 +86,11 @@ def main(target, outname=OUTNAME, recursive=False):
     for file in files:
         imagegps = exifgps.read(file)  # create the ImageGPS object
         # print(imagegps)
+
+        # Dynamic update to Imagegps class. Modifying _read_exif() and adding get_datetime().
+        exifgps.Imagegps._read_exif = _read_exif
+        exifgps.Imagegps.get_datetime = get_datetime
+
         imagegps.process_exif()  # read EXIF data and convert to KML coordinate format
         if imagegps._has_gps:
             # print(file, imagegps._decimal_degrees)
@@ -63,12 +100,14 @@ def main(target, outname=OUTNAME, recursive=False):
 
             # construct the KML tag and add it
             # TODO set the relative altitude mode...
-            description = '<img style="max-width:500px;" src="file://' + file + '">'
-            p = kml.Placemark(ns, file, file, description)
+            description = 'Photo taken at: ' + str(
+                imagegps.get_datetime()) + '<img style="max-width:500px;" src="file://' + file + '">' + file
+            p = kml.Placemark(ns, file, file.split('/')[-1], description)
             # KML uses long, lat, alt for ordering coordinates (x, y, z)
             p.geometry = Point(easting, northing, elevation)
             d.append(p)
             exifcount += 1
+
     print('Found', exifcount, 'geo-tagged photos.')
     # finish the KML
     # print(k.to_string(prettyprint=True))

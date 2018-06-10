@@ -29,24 +29,27 @@ def read_exif():
         print(type(tags))
         print(tags)
         pprint(tags)
-        print('=====')
+        print('==========')
 
         for k in tags.keys():
-            if 'GPSL' in k.upper():
+            # if 'GPSL' in k.upper():
+            #     print(k, tags[k])
+            #     print(k)
+            #     pprint(k)
+            #     print('type:', type(tags[k]), tags[k])
+            #     pprint(tags[k])
+            #     print('=====')
+            if 'TIME' in k.upper():
                 print(k, tags[k])
-                print(k)
-                pprint(k)
-                print('type:', type(tags[k]), tags[k])
-                pprint(tags[k])
                 print('=====')
 
         lat = tags['GPS GPSLatitude']
         lat_ref = tags['GPS GPSLatitudeRef']
         long = tags['GPS GPSLongitude']
         long_ref = tags['GPS GPSLongitudeRef']
-        print(lat, lat_ref)
-        print(long, long_ref)
-        print('=====')
+        # print(lat, lat_ref)
+        # print(long, long_ref)
+        # print('=====')
 
         # using PIL
         im = Image.open(f)
@@ -54,9 +57,10 @@ def read_exif():
         # print(tags_pil)
         for tag, value in tags_pil.items():
             decoded = TAGS.get(tag, tag)
-            if decoded is 'GPSInfo':
-                print(decoded)
-                pprint(value)
+            # if decoded is 'GPSInfo':
+            #     print(decoded)
+            #     pprint(value)
+            print(decoded)
     # image = exifgps.read(photo_path)
     # image.process_exif()
     # print(image)
@@ -165,7 +169,7 @@ def main():
         f.write(k.to_string())
 
 
-# read_exif()
+read_exif()
 # write_kml()
 # list_photos()
-main()
+# main()
