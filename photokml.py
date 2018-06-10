@@ -24,6 +24,8 @@ def main(target, outname=OUTNAME, recursive=False):
     # any other EXIF data
     # make a KMZ that includes the photos (or URL to show the photo in Google Earth)
 
+    exifcount = 0  # How many photos with geo EXIF data were processed.
+
     # TODO why don't relative paths work? Not expanded by shell?
     # TODO test cross platform paths ('\' vs '/')
     # fix path string
@@ -66,11 +68,13 @@ def main(target, outname=OUTNAME, recursive=False):
             # KML uses long, lat, alt for ordering coordinates (x, y, z)
             p.geometry = Point(easting, northing, elevation)
             d.append(p)
+            exifcount += 1
+    print('Found', exifcount, 'geo-tagged photos.')
     # finish the KML
     # print(k.to_string(prettyprint=True))
     with open(outname, 'w') as f:
         f.write(k.to_string())
-        print('Finished. Wrote to:', outname)
+        print('Finished. Wrote output to:', outname)
 
 
 if __name__ == '__main__':
@@ -78,6 +82,7 @@ if __name__ == '__main__':
         print('Error! No path specified.')
         print('Usage: %s <path> [output]' % sys.argv[0])
         exit()
+    print('Running PhotoKML.')
     if len(sys.argv) == 3:
         main(sys.argv[1], sys.argv[2])
     else:
