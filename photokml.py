@@ -15,7 +15,8 @@ import exifgps  # NOT Python 3 ready (uses print statement)
 from fastkml import kml  # seems more current than pyKML
 from shapely.geometry import Point
 
-OUTNAME = 'photos.kml'
+
+# OUTNAME = 'photos.kml'
 
 
 def _read_exif(self, filename):
@@ -49,7 +50,7 @@ def get_datetime(self):
     return self._tags['Image DateTime']
 
 
-def main(target, outname=OUTNAME, recursive=False):
+def main(target, outname=None, recursive=False):
     # read all the EXIF data from the target folder (or webserver?)
     # generate a KML with points
     # date-time of photo
@@ -60,14 +61,20 @@ def main(target, outname=OUTNAME, recursive=False):
 
     # TODO why don't relative paths work? Not expanded by shell?
     # TODO test cross platform paths ('\' vs '/')
+
+    target = target.replace('\\', '/')
     # fix path string on linux
     if not target.endswith('/'):
         target += '/'
 
+    if outname is None:
+        name = target.split('/')[-2]
+        outname = name + '.kml'
+
     # initialize the KML document
     k = kml.KML()
     ns = '{http://www.opengis.net/kml/2.2}'
-    d = kml.Document(ns, 'docid', 'doc name', 'doc description')  # TODO update fields
+    d = kml.Document(ns, name, name, name)  # TODO update fields
     k.append(d)
 
     # Gather all the filenames in the target directory. Not recursive.
@@ -100,8 +107,17 @@ def main(target, outname=OUTNAME, recursive=False):
 
             # construct the KML tag and add it
             # TODO set the relative altitude mode...
-            description = 'Photo taken at: ' + str(
-                imagegps.get_datetime()) + '<img style="max-width:500px;" src="file://' + file + '">' + file
+            # add '/' for Windows local paths
+            if not file.startswith('/'):
+                link = 'file:///' + file
+            else:
+                link = 'file://' + file
+
+            description = '<img style="max-width:500px;" src="' + \
+                          link + \
+                          '">' + \
+                          'Photo taken at: ' + \
+                          str(imagegps.get_datetime()) + '<br>' + '<a href="' + file + '">' + file + '</a>'
             p = kml.Placemark(ns, file, file.split('/')[-1], description)
             # KML uses long, lat, alt for ordering coordinates (x, y, z)
             p.geometry = Point(easting, northing, elevation)
