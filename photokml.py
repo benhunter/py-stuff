@@ -117,7 +117,7 @@ def main(target, outname=None, recursive=False):
         path_filenames = []
         for file in filesnames:
             fullpath = dirpath + '\\' + file
-            print(fullpath)
+            # print(fullpath)  # debugging aid
             path_filenames.append(fullpath)  # use the full path to each file
         files.extend(path_filenames)
         if not recursive:
@@ -166,9 +166,9 @@ def main(target, outname=None, recursive=False):
             p.geometry = Point(easting, northing, elevation)
             d.append(p)
             exifcount += 1
-            print_progress(i, len(files), bar_length=50)
+        print_progress(i, len(files), bar_length=50)
 
-    print('Found', exifcount, 'geo-tagged photos.')
+    print('Found ' + exifcount + ' geo-tagged photos.')
     # finish the KML
     # print(k.to_string(prettyprint=True))
 
