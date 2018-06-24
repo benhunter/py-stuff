@@ -9,15 +9,15 @@ from pprint import pprint
 
 import exifgps  # NOT Python 3 ready (uses print statement)
 import exifread
-from PIL import Image
+from PIL import Image  # package Pillow
 from PIL.ExifTags import TAGS
 from fastkml import kml  # seems more current than pyKML
 from shapely.geometry import Point
 
-# target = '~/Drive/Class River/'  # relative paths don't seem to work?
-target = '//home/infinite/Drive/Class River/'
-# photo_path = 'E:\\google drive\\Photos and Videos\\Class River\\IMG_1406.JPG'
-photo_path = '//home/infinite/Drive/Class River/IMG_1468.JPG'
+# target = ''  # relative paths don't seem to work?
+target = ''
+# photo_path = ''
+photo_path = ''
 kml_path = 'test-kml.kml'
 
 
