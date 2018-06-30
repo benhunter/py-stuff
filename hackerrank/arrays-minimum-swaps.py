@@ -18,28 +18,21 @@ def minimumSwapsIndex(arr):
 
 def minimumSwaps(arr):
     count = 0
-    index = 0
-    while index < len(arr):
-
+    for index in range(len(arr)):
         item = arr[index]
         # print('index', index, 'item', item, 'arr', arr)
         if index == item - 1:
-            index += 1
             continue
 
         # swap with index+1, wherever it is. arr[index] must be good to proceed
-        j = index + 1
-        while arr[j] != (index + 1):
-            j += 1
-        swaploc = j
-
+        # print('swapping', arr[item-1], 'with', item)
+        swaploc = arr.index(index + 1)
         arr[index] = arr[swaploc]
         arr[swaploc] = item
 
         count += 1
-        index += 1
         # print('after swap', arr)
-    print(count)
+    # print(count)
     return count
 
 
