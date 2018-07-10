@@ -26,19 +26,20 @@ def table(n):
     print(column)
 
     for i in range(1, n + 1):
-        print(str(i).rjust(column, ' '), oct(i)[2:].rjust(column, ' '), hex(i)[2:].rjust(column, ' '),
-              bin(i)[2:].rjust(column, ' '))
+        # print(str(i).rjust(column, ' '), oct(i)[2:].rjust(column, ' '), hex(i)[2:].rjust(column, ' '),
+        #       bin(i)[2:].rjust(column, ' '))
         print(str(i).rjust(column, ' '), oct(i)[2:].rjust(column, ' '),
-              f'{' + i + '}.rjust(column, ' '), bin(i)[2:].rjust(column, ' '))
+              '{:X}'.format(i).rjust(column, ' '), bin(i)[2:].rjust(column, ' '))
 
-        table(2)
-        print()
-        print(''' 1  1  1  1
- 2  2  2 10''')
-        print()
-        table(17)
-        print()
-        print('''    1     1     1     1
+
+table(2)
+print()
+print(''' 1  1  1  1
+ 10''')
+print()
+table(17)
+print()
+print('''    1     1     1     1
     2     2     2    10
     3     3     3    11
     4     4     4   100
