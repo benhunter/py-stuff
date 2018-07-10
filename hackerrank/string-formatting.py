@@ -23,7 +23,7 @@
 
 def table(n):
     column = len(bin(n)[2:])
-    print(column)
+    # print(column)
 
     for i in range(1, n + 1):
         # print(str(i).rjust(column, ' '), oct(i)[2:].rjust(column, ' '), hex(i)[2:].rjust(column, ' '),
