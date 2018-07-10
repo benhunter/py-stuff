@@ -168,7 +168,7 @@ def main(target, outname=None, recursive=False):
             exifcount += 1
         print_progress(i, len(files), bar_length=50)
 
-    print('Found ' + exifcount + ' geo-tagged photos.')
+    print('Found ' + str(exifcount) + ' geo-tagged photos.')
     # finish the KML
     # print(k.to_string(prettyprint=True))
 
