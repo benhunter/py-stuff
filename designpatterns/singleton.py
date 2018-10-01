@@ -31,6 +31,8 @@ id(d)
 class Borg:
     '''
     All Borg objects share the same symbol table of writable attributes, __dict__
+
+    Note: Borg has issues with 'new style' classes, aka class Name(object): instead of class Name():
     '''
     __shared_state = {}
 
