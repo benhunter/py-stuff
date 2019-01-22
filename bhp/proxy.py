@@ -161,7 +161,7 @@ def main():
     elif "false" == sys.argv[5].lower():
         receive_first = False
     else:
-        raise Exception("Bad argument in <Receive first?>")
+        print("Bad argument in <Receive first?>")
         usage()
         sys.exit(1)
     server_loop(local_host, local_port, remote_host, remote_port, receive_first)
