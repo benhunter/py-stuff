@@ -16,12 +16,13 @@ def hexdump(src, length=16):
 
     print('\n'.join(result))
 
-def receive_from(connection):
+
+def receive_from(connection, timeout=2):
     buffer = ""
 
     # Set 2 second timeout
     # Adjust based on target
-    connection.settimeout(2)
+    connection.settimeout(10)  # TODO what's the point in setting a timeout? to prevent blocking
     try:
         # Read into buffer until no data or timeout.
         while True:
@@ -30,20 +31,23 @@ def receive_from(connection):
 
             if not data:
                 print('No data!!')
+                connection.close()
                 break
             buffer += data
-    except Exception as e:
-        print('Exception', e)
-        pass
+    except socket.timeout as e:
+        print('Exception', e, type(e))
     return buffer
+
 
 def request_handler(buffer):
     # perform packet modifications, look for credentials or data
     return buffer
 
+
 def response_handler(buffer):
     # perform packet modifications, look for credentials or data
     return buffer
+
 
 def proxy_handler(client_socket, remote_host, remote_port, receive_first):
 
@@ -71,46 +75,48 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
     # now loop and read from local, send to remote, send to local.
 
     while True:
+        try:
+            # read for local host
+            print('Receive from client', client_socket.getsockname())
+            local_buffer = receive_from(client_socket)
 
-        # read for local host
-        print('Receive from client', client_socket.getsockname())
-        local_buffer = receive_from(client_socket)
+            if len(local_buffer):
 
-        if len(local_buffer):
+                print("[==>] Received %d bytes from localhost." % len(local_buffer))
+                hexdump(local_buffer)
 
-            print("[==>] Received %d bytes from localhost." % len(local_buffer))
-            hexdump(local_buffer)
+                # send it to our request handler
+                local_buffer = request_handler(local_buffer)
 
-            # send it to our request handler
-            local_buffer = request_handler(local_buffer)
+                # send off data to remote host
+                remote_socket.sendall(local_buffer.encode('utf-8'))  # TODO send or sendall?
+                print("[==>] Sent to remote.")
 
-            # send off data to remote host
-            remote_socket.sendall(local_buffer.encode('utf-8'))  # TODO send or sendall?
-            print("[==>] Sent to remote.")
+                # receive the response
+                print('Receive from remote', remote_socket.getsockname())
+                remote_buffer = receive_from(remote_socket)
 
-            # receive the reponse
-            print('Receive from remote', remote_socket.getsockname())
-            remote_buffer = receive_from(remote_socket)
+                if len(remote_buffer):
+                    print("[<==] Received %d bytes from remote." % len(remote_buffer))
+                    hexdump(remote_buffer)
 
-            if len(remote_buffer):
+                    # send to response handler
+                    remote_buffer = response_handler(remote_buffer)
 
-                print("[<==] Received %d bytes from remote." % len(remote_buffer))
-                hexdump(remote_buffer)
+                    # send response to local socket
+                    client_socket.sendall(remote_buffer.encode('utf-8'))  # TODO send or sendall?
 
-                #send to response handler
-                remote_buffer = response_handler(remote_buffer)
+                    print("[<==] Send to localhost.")
 
-                # send response to local socket
-                client_socket.sendall(remote_buffer.encode('utf-8'))  # TODO send or sendall?
+                if not len(local_buffer) or not len(remote_buffer):
+                    client_socket.close()
+                    remote_socket.close()
+                    print("[*] No more data. Closing connections")
 
-                print("[<==] Send to localhost.")
-
-            if not len(local_buffer) or not len(remote_buffer):
-                client_socket.close()
-                remote_socket.close()
-                print("[*] No more data. Closing connections")
-
-                break
+                    break
+        except OSError as e:
+            print('OSError:', e)
+            break
 
 
 def server_loop(local_host, local_port, remote_host, remote_port, receive_first):
@@ -119,7 +125,6 @@ def server_loop(local_host, local_port, remote_host, remote_port, receive_first)
 
     try:
         server.bind((local_host, local_port))
-
     except:
         print("[!!] Failed to listen on %s:%d" % (local_host, local_port))
         print("[!!] Check for other listening sockets or correct permissions.")
@@ -130,29 +135,38 @@ def server_loop(local_host, local_port, remote_host, remote_port, receive_first)
 
     while True:
         client_socket, addr = server.accept()
-
         print("[==>] Received incoming connection from %s:%d" % (addr[0], addr[1]))
-
-        proxy_thread = threading.Thread(target=proxy_handler, args=(client_socket, remote_host, remote_port, receive_first))
-
+        proxy_thread = threading.Thread(target=proxy_handler,
+                                        args=(client_socket, remote_host, remote_port, receive_first))
         proxy_thread.start()
 
-if __name__ == '__main__':
-    if len(sys.argv[1:]) != 5:
-        print("Usage: ./proxy.py 127.0.0.1 9000 10.12.132.1 9000 True")
-        sys.exit(0)
 
+def usage():
+    print("Usage: ./proxy.py <LHOST> <LPORT> <RHOST> <RPORT> <Receive first?>")
+    print("Usage: ./proxy.py 127.0.0.1 9000 10.12.132.1 9000 True")
+
+
+def main():
+    if len(sys.argv[1:]) != 5:
+        usage()
+        sys.exit(1)
     # setup local listening parameters
     local_host = sys.argv[1]
     local_port = int(sys.argv[2])
-
     # setup remote target
     remote_host = sys.argv[3]
     remote_port = int(sys.argv[4])
-
-    if "True" in sys.argv[5]:
+    if "true" == sys.argv[5].lower():
         receive_first = True
-    else:
+    elif "false" == sys.argv[5].lower():
         receive_first = False
-
+    else:
+        raise Exception("Bad argument in <Receive first?>")
+        usage()
+        sys.exit(1)
     server_loop(local_host, local_port, remote_host, remote_port, receive_first)
+    sys.exit(0)
+
+
+if __name__ == '__main__':
+    main()

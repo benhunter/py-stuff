@@ -12,7 +12,7 @@ def ssh_command(host, user, passwd, command, port=22):
     :param user: Username
     :param passwd: Password
     :param command: Shell command to exectute on the local host.
-    :param port: Defauly SSH port 22
+    :param port: Default SSH port 22
     :return: Nothing
     '''
     client = paramiko.SSHClient()
@@ -34,4 +34,5 @@ def ssh_command(host, user, passwd, command, port=22):
     return
 
 
-ssh_command('127.0.0.1', user='test', passwd='testpwd', command='ClientConnected', port=2222)
+if __name__ == "__main__":
+    ssh_command('127.0.0.1', user='test', passwd='testpwd', command='ClientConnected', port=2222)

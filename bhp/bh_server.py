@@ -6,7 +6,7 @@ import threading
 
 import paramiko
 
-# Usage ./bh_server.py server port
+# Usage: ./bh_server.py server port
 # Works with bh_sshRcmd.py
 
 

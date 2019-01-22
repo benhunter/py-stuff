@@ -17,7 +17,7 @@ upload_destination = ""
 port = 0
 
 
-# TODO convert to optparse instead of getopt
+# TODO convert to argparse instead of getopt
 def usage():
     print("BHP Net Tool")
     print()
@@ -80,11 +80,11 @@ def client_sender(buffer):
 
 
             # print("<DEBUG> Printing response and reading from stdin.")
-            print(response, end='')  # TODO remove the \n that print() adds
+            print(response, end='')  # remove the \n that print() adds
 
             # wait for more input
             buffer = input("")  # was raw_input() in Python 2 TODO this acts weird...
-            # buffer = sys.stdin.readline()  # TODO read or readline
+            # buffer = sys.stdin.readline()  # includes a '\n' at the end
             # TODO needed?: buffer += "\n"
             buffer += "\n"
 
@@ -148,7 +148,7 @@ def client_handler(client_socket):
         # keep reading data until none is available
         while True:
             print('<DEBUG>  Handling upload. Waiting on socket recv...')
-            data = client_socket.recv(1024).decode('utf-8') # TODO decode was not in book
+            data = client_socket.recv(1024).decode('utf-8')
 
             if not data:
                 print('<DEBUG> Handling upload. No data, breaking out of recv loop.')
@@ -275,6 +275,7 @@ def main():
                                    ["help", "listen", "execute", "target", "port", "command", "upload"])
     except getopt.GetoptError as err:
         print(str(err))
+        return
 
     for o, a in opts:
         if o in ("-h", "--help"):
@@ -293,7 +294,7 @@ def main():
         elif o in ("-p", "--port"):
             port = int(a)
         else:
-            assert False, "Unhandled Option"
+            raise Exception("Unhandled option")
 
     # are we going to listen or just send data from stdin?
     if not listen and len(target) and port > 0:
@@ -302,8 +303,10 @@ def main():
         # read in the buffer from the command line
         # this will block, send EOF (Ctrl-d on Linux, Ctrl-z on Windows)
         # if not sending input to stdin
-        # TODO really needed?
-        buffer = sys.stdin.read()  # TODO should it be read (original) or readline?
+        # TODO really needed? causes extra input when connecting to bhpnet command server.
+        # buffer = sys.stdin.read()  # TODO should it be read (original) or readline (with '\n')?
+        # buffer = input()
+        buffer = ''
 
         # send data off
         print("[*] Starting client_sender with stdin buffer.")
@@ -311,8 +314,12 @@ def main():
 
     # listen and potentially upload, execute commands or drop a shell back
     # depending on command line options
-    if listen:
+    elif listen:
         server_loop()
 
+    else:
+        raise Exception("Invalid option")
 
-main()
+
+if __name__ == "__main__":
+    main()
