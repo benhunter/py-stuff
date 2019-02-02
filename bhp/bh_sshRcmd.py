@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import subprocess
+import sys
 
 import paramiko
 
@@ -35,4 +36,14 @@ def ssh_command(host, user, passwd, command, port=22):
 
 
 if __name__ == "__main__":
-    ssh_command('127.0.0.1', user='test', passwd='testpwd', command='ClientConnected', port=2222)
+    if len(sys.argv) != 6:
+        print("Usage: python bh_sshRcmd.py HOST PORT USER PASSWORD COMMAND")
+        print("Example: python bh_sshRcmd.py 127.0.0.1 22 user secret123 ClientConnected")
+        sys.exit(1)
+    remote_host = sys.argv[1]
+    remote_port = sys.argv[2]
+    user = sys.argv[3]
+    password = sys.argv[4]
+    command = sys.argv[5]
+
+    ssh_command(remote_host, user=user, passwd=password, command=command, port=remote_port)

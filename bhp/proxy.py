@@ -3,13 +3,39 @@ import sys
 import threading
 
 
-def hexdump(src, length=16):
+def hexdump(src_bytes, length=16):
+    '''
+    Dump hexadecimal
+    :param src_bytes: Bytes, Bytearray, or compatible object
+    :param length: Length of each output line
+    :return:
+    '''
     result = []
-    digits = 4 # python2 code, all python3 strings are Unicode: if isinstance(src, unicode) else 2
+    digits = 4  # python2 code, all python3 strings are Unicode: if isinstance(src, unicode) else 2
 
     # for i in xrange(0, len(src), length):
-    for i in range(0, len(src), length):
-        s = src[i:i+length]
+    for i in range(0, len(src_bytes), length):
+        s = src_bytes[i:i + length]
+        hexa = ' '.join(["%0*X" % (digits, x) for x in s])
+        text = ''.join([chr(x) if 0x20 <= x < 0x7F else '.' for x in s])
+        result.append('%04X   %-*s   %s' % (i, length * (digits + 1), hexa, text))
+
+    print('\n'.join(result))
+
+
+def hexdump_string(src_string, length=16):
+    '''
+    Dump hexadecimal
+    :param src_string: String or compatible object
+    :param length: Length of each output line
+    :return:
+    '''
+    result = []
+    digits = 4  # python2 code, all python3 strings are Unicode: if isinstance(src, unicode) else 2
+
+    # for i in xrange(0, len(src), length):
+    for i in range(0, len(src_string), length):
+        s = src_string[i:i + length]
         hexa = ' '.join(["%0*X" % (digits, ord(x)) for x in s])
         text = ''.join([x if 0x20 <= ord(x) < 0x7F else '.' for x in s])
         result.append('%04X   %-*s   %s' % (i, length * (digits + 1), hexa, text))
@@ -17,17 +43,18 @@ def hexdump(src, length=16):
     print('\n'.join(result))
 
 
-def receive_from(connection, timeout=2):
-    buffer = ""
+def receive_from(connection, timeout=1):
+    buffer = bytearray(b'')
 
-    # Set 2 second timeout
+    # Set 1 second timeout
     # Adjust based on target
-    connection.settimeout(10)  # TODO what's the point in setting a timeout? to prevent blocking
+    connection.settimeout(timeout)  # TODO what's the point in setting a timeout? to prevent blocking
     try:
         # Read into buffer until no data or timeout.
         while True:
             print('connection.recv(4096),', connection.getsockname())
-            data = connection.recv(4096).decode('utf-8')
+            # data = connection.recv(4096).decode('utf-8')  # TODO decode or leave as bytes?
+            data = connection.recv(4096)  # TODO decode or leave as bytes? let's try bytes...bytearray is mutable
 
             if not data:
                 print('No data!!')
@@ -60,7 +87,7 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
     if receive_first:
 
         print('Receive from remote first')
-        remote_buffer = receive_from(remote_socket)
+        remote_buffer = receive_from(remote_socket)  # TODO now returning bytes
         print('Receive first, dumping recv')
         hexdump(remote_buffer)
 
@@ -70,7 +97,8 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
         # if we have data for local client, send it
         if len(remote_buffer):
             print("[<==] Sending %d bytes to localhost." % len(remote_buffer))
-            client_socket.sendall(remote_buffer.encode('utf-8'))  # TODO send or sendall?
+            # client_socket.sendall(remote_buffer.encode('utf-8'))  # now working with bytes TODO send or sendall?
+            client_socket.sendall(remote_buffer)  # TODO send or sendall?
 
     # now loop and read from local, send to remote, send to local.
 
@@ -78,7 +106,7 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
         try:
             # read for local host
             print('Receive from client', client_socket.getsockname())
-            local_buffer = receive_from(client_socket)
+            local_buffer = receive_from(client_socket)  # TODO now returning bytes
 
             if len(local_buffer):
 
@@ -89,12 +117,13 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
                 local_buffer = request_handler(local_buffer)
 
                 # send off data to remote host
-                remote_socket.sendall(local_buffer.encode('utf-8'))  # TODO send or sendall?
+                # remote_socket.sendall(local_buffer.encode('utf-8'))  # now working with bytes TODO send or sendall?
+                remote_socket.sendall(local_buffer)  # TODO send or sendall?
                 print("[==>] Sent to remote.")
 
                 # receive the response
                 print('Receive from remote', remote_socket.getsockname())
-                remote_buffer = receive_from(remote_socket)
+                remote_buffer = receive_from(remote_socket)  # TODO now returning bytes
 
                 if len(remote_buffer):
                     print("[<==] Received %d bytes from remote." % len(remote_buffer))
@@ -104,7 +133,8 @@ def proxy_handler(client_socket, remote_host, remote_port, receive_first):
                     remote_buffer = response_handler(remote_buffer)
 
                     # send response to local socket
-                    client_socket.sendall(remote_buffer.encode('utf-8'))  # TODO send or sendall?
+                    # client_socket.sendall(remote_buffer.encode('utf-8'))  # now working with bytes TODO send or sendall?
+                    client_socket.sendall(remote_buffer)  # TODO send or sendall?
 
                     print("[<==] Send to localhost.")
 
