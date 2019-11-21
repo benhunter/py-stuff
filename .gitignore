@@ -1,0 +1,7 @@
+__pycache__/
+.idea/
+.pytest_cache/
+.vscode/
+venv/
+*.kml
+jsontest.txt
