@@ -5,3 +5,8 @@ __pycache__/
 venv/
 *.kml
 jsontest.txt
+
+freezing/__pycache__/
+freezing/build/
+freezing/dist/
+freezing/hello_world.spec
