@@ -7,8 +7,12 @@ ip_list = '''1.1.1.1,1.1.1.0/24
 198.51.56.59,192.175.61.144/29
 192.31.218.80,164.175.96.0/19
 203.0.120.150,198.10.96.128/27'''
-
 ip_list = ip_list.splitlines()
+
+# Or from file
+# ip_file = 'file.txt'
+# with open(ip_file) as f:
+#   ip_list = f.read().splitlines()
 
 for pair in ip_list:
     ip, subnet = pair.split(',')
