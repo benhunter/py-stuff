@@ -1,5 +1,4 @@
 # py-stuff
- Python Stuff
 
 * [Password checker](https://github.com/benhunter/chkpwd) - (Moved to own repo) Test a string for complexity requirements associated with passwords. Uses regular expressions and argparse for command line interface.
 * [Black Hat Python book](https://github.com/benhunter/py-stuff/tree/master/bhp) - rewriting for Python 3.
