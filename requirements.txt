@@ -1,32 +1,11 @@
-astroid (2.3.2)
-atomicwrites (1.1.5)
-attrs (18.1.0)
-certifi (2018.8.24)
-chardet (3.0.4)
-colorama (0.4.1)
-exifgps (1.14)
-ExifRead (2.1.2)
-fastkml (0.11)
-idna (2.7)
-isort (4.3.21)
-lazy-object-proxy (1.4.3)
-lxml (4.2.1)
-mccabe (0.6.1)
-more-itertools (4.2.0)
-Pillow (5.1.0)
-pip (9.0.1)
-pluggy (0.6.0)
-py (1.5.4)
-pycryptodome (3.7.3)
-pygeoif (0.7)
-pylint (2.4.3)
-pytest (3.6.2)
-python-dateutil (2.7.3)
-requests (2.19.1)
-requests-toolbelt (0.8.0)
-setuptools (28.8.0)
-Shapely (1.6.4.post1)
-six (1.12.0)
-typed-ast (1.4.0)
-urllib3 (1.23)
-wrapt (1.11.2)
+colorama == 0.4.1
+exifgps == 1.14
+ExifRead == 2.1.2
+fastkml == 0.11
+Pillow >= 5.1.0
+pycryptodome == 3.7.3
+pylint
+pytest
+requests
+Shapely >= 1.6
+typed-ast == 1.4.0
