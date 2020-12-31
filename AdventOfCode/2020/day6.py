@@ -1,7 +1,6 @@
 # Advent of Code Day 6
 # https://adventofcode.com/2020/day/6
 
-from collections import OrderedDict
 import string
 
 with open("day6-input.txt") as f:
