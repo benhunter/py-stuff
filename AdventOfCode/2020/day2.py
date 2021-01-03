@@ -4,7 +4,7 @@
 countpart1 = 0
 countpart2 = 0
 
-with open("day2-input.txt") as f:
+with open(".\\AdventOfCode\\2020\\day2-input.txt") as f:
     password_list = [line.rstrip() for line in f]
     # print(password_list)
 

@@ -3,7 +3,7 @@
 
 import itertools
 
-in_file_name = "day1-input.txt"
+in_file_name = ".\\AdventOfCode\\2020\\day1-input.txt"
 
 with open(in_file_name) as f:
     # expense_report = [line.rstrip() for line in f]

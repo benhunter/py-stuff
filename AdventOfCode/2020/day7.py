@@ -7,7 +7,7 @@ from functools import reduce
 from pprint import pprint
 
 
-with open("day7-input.txt") as f:
+with open(".\\AdventOfCode\\2020\\day7-input.txt") as f:
     lines = [line.rstrip() for line in f]
 
 # print(rules)

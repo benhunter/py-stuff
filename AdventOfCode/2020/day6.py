@@ -3,7 +3,7 @@
 
 import string
 
-with open("day6-input.txt") as f:
+with open(".\\AdventOfCode\\2020\\day6-input.txt") as f:
     lines = f.read()  # read file to a single string
 
 # make a list of groups. Two newlines seperate records.

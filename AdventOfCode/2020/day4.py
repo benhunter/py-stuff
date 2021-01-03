@@ -7,7 +7,7 @@ import re
 ECL_LIST = ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
 
 
-with open("day4-input.txt") as f:
+with open(".\\AdventOfCode\\2020\\day4-input.txt") as f:
     lines = f.read()  # read file to a single string
 
 # make a list of records. Two newlines seperate records.

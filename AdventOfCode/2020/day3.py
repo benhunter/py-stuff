@@ -1,7 +1,7 @@
 # Advent of Code Day 3
 # https://adventofcode.com/2020/day/3
 
-with open("day3-input.txt") as f:
+with open(".\\AdventOfCode\\2020\\day3-input.txt") as f:
     slope = [line.rstrip() for line in f]
 
 # print(slope[0])
