@@ -3,4 +3,13 @@
 first_dict = {0: False, 1: False}
 second_dict = dict.fromkeys(first_dict, True)
 
-print()
+
+# Slicing
+string = "abcdefghijklmnopqrstuvwxyz"
+
+# for index in range(len(string)):
+    # print(string[:index], string[index:])
+
+for index in range(len(string) - 1):
+    print(string[:index + 1], string[index + 1:])
+    
