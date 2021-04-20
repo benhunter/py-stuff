@@ -10,7 +10,7 @@ print(md)  # prints 3 - the max key
 
 # search for the key of a specific value
 next((key for key, value in third_dict.items() if value == 8), None)  # fails gracefully
-third_dict.keys()[third_dict.values().index(8)]  # fast for very large dicts
+list(third_dict.keys())[list(third_dict.values()).index(8)]  # fast for very large dicts
  
 
 # Slicing
