@@ -3,10 +3,14 @@
 first_dict = {0: False, 1: False}
 second_dict = dict.fromkeys(first_dict, True)
 
-# max of dict
+# max of dict gets the max key not max value
 third_dict = {1:34, 3:8}
 md = max(third_dict)
 print(md)  # prints 3 - the max key
+
+# search for the key of a specific value
+next((key for key, value in third_dict.items() if value == 8), None)  # fails gracefully
+third_dict.keys()[third_dict.values().index(8)]  # fast for very large dicts
  
 
 # Slicing
@@ -18,7 +22,7 @@ string = "abcdefghijklmnopqrstuvwxyz"
 for index in range(len(string) - 1):
     print(string[:index + 1], string[index + 1:])
 
-
+    
 
 # Insert a list into another list - efficiently?
 inner = list(range(3))
