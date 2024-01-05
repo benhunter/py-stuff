@@ -3,7 +3,7 @@ exifgps == 1.14
 ExifRead == 2.1.2
 fastkml == 0.11
 Pillow >= 5.1.0
-pycryptodome == 3.7.3
+pycryptodome == 3.19.1
 pylint
 pytest
 requests
